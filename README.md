@@ -1,2 +1,2 @@
 # fuckydick-web
-IPC批量工具网页版
+尊雕IPC批量工具网页版
