@@ -2,7 +2,7 @@
   "name": "fuckydick-web",
   "productName": "fuckydick-web",
   "version": "1.0.0",
-  "description": "IPC 批量工具，用于扫描局域网设备并管理 IPC",
+  "description": "监控IPC 批量工具，用于扫描局域网设备并管理 IPC",
   "main": ".vite/build/main.js",
   "author": {
     "name": "wufanlong",
