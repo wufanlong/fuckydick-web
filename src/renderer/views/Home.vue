@@ -1,9 +1,9 @@
 
 <template>
-  尊雕
+  💖 尊雕
   <v-divider :thickness="16"></v-divider>
   {{ count }}
-  <button @click="count++">Click me</button>
+  <button class="font-bold" @click="count++"><span class="font-bold">Click me</span></button>
 </template>
 
 <script setup>
