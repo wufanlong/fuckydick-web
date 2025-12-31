@@ -1,7 +1,7 @@
 const { contextBridge, ipcRenderer } = require('electron')
 
 contextBridge.exposeInMainWorld('system', {
-  camera: {
+  "camera": {
     scanDevices: () => ipcRenderer.invoke('camera:scanDevices')
   }
-})
+}) 

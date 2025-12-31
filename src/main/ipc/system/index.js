@@ -1,1 +1,1 @@
-import './scan.ipc'
+import './scan.ipc.js'

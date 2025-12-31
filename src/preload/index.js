@@ -1,1 +1,1 @@
-import './bridge/index.js'
+import './bridge'

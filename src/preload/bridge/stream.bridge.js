@@ -1,4 +1,7 @@
-/**
- * Auto generated file
- * Path: preload/bridge/stream.bridge.js
- */
+const { contextBridge, ipcRenderer } = require('electron')
+
+contextBridge.exposeInMainWorld('stream', {
+  camera: {
+    scanDevices: () => ipcRenderer.invoke('camera:scanDevices')
+  }
+})

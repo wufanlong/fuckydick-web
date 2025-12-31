@@ -8,10 +8,6 @@ export const createWindow = () => {
     height: 500,
     title: "全局配置",
     fullscreen: false,
-    icon: path.join(__dirname, "../../../public/icon.ico"), // ← 这里指定图标
-    webPreferences: {
-      preload: path.join(__dirname, "preload.js"),
-    },
     hash: 'config',
     parent: windowManager.getByName("mainWindow"),
     modal: true,
@@ -22,4 +18,6 @@ export const createWindow = () => {
   window.on('page-title-updated', (e) => {
     e.preventDefault();
   });
+
+  window.webContents.openDevTools({ mode: 'detach' });
 };

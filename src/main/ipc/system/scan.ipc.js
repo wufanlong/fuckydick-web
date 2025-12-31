@@ -1,6 +1,4 @@
 const { ipcMain } = require('electron')
-const dgram = require('dgram') // 用于局域网广播 / UDP 发现
-const os = require('os')
 
 ipcMain.handle('camera:scanDevices', async () => {
   return new Promise((resolve, reject) => {
