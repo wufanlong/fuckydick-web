@@ -1,4 +1,3 @@
-/**
- * Auto generated file
- * Path: main/config/app.config.js
- */
+export const windowsGlobalOptions = {
+  backgroundColor: "#EDEDED", // ⭐ 关键配置：窗口背景色
+};

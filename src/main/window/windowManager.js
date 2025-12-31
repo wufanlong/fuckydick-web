@@ -1,10 +1,13 @@
 import { BrowserWindow } from "electron";
 import { createWindow as createConfigWindow } from "./config.window.js";
 import path from 'node:path'
+import { windowsGlobalOptions } from "../config/app.config.js";
 const map = {};
 
 export default {
   createWindow(options) {
+    // 引入全局配置
+    Object.assign(options, windowsGlobalOptions);
     let window = new BrowserWindow(options);
     options.hash = options.hash || '';
     if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
