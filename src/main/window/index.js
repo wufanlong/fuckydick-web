@@ -1,1 +1,2 @@
-import './menu.window.js'
+import './main.window.js'
+import './menu.js'
