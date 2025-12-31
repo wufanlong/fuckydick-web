@@ -1,42 +1,37 @@
-// scanner/index.js
-const { scanArp } = require('./arp');
-const { scanPorts } = require('./port');
-const { scanSSDP } = require('./ssdp');
-const { CAMERA_PORTS, fingerprint } = require('./device-fingerprint');
+import { scanArp } from "./arp.js";
+import { scanPorts } from "./port.js";
+import { scanSSDP } from "./ssdp.js";
+import { CAMERA_PORTS, fingerprint } from "./device-fingerprint.js";
 
-async function scanNetwork() {
-  console.log('🔍 ARP 扫描中...');
+export async function fastScan() {
+  console.log("🔍 ARP 扫描中...");
   const arpDevices = await scanArp();
 
-  console.log(`📡 发现 ${arpDevices.length} 台设备`);
+  // console.log(`📡 发现 ${arpDevices.length} 台设备`);
 
-  const results = [];
+  // const results = [];
 
-  for (const dev of arpDevices) {
-    const openPorts = await scanPorts(dev.ip, CAMERA_PORTS);
+  // for (const dev of arpDevices) {
+  //   const openPorts = await scanPorts(dev.ip, CAMERA_PORTS);
 
-    results.push(
-      fingerprint({
-        ...dev,
-        openPorts
-      })
-    );
-  }
+  //   results.push(
+  //     fingerprint({
+  //       ...dev,
+  //       openPorts,
+  //     })
+  //   );
+  // }
 
-  console.log('📢 SSDP 探测中...');
-  const ssdpDevices = await scanSSDP();
+  // console.log("📢 SSDP 探测中...");
+  // const ssdpDevices = await scanSSDP();
 
-  // 合并 SSDP 信息
-  results.forEach(d => {
-    const match = ssdpDevices.find(s => s.ip === d.ip);
-    if (match) {
-      d.ssdp = match;
-    }
-  });
+  // // 合并 SSDP 信息
+  // results.forEach((d) => {
+  //   const match = ssdpDevices.find((s) => s.ip === d.ip);
+  //   if (match) {
+  //     d.ssdp = match;
+  //   }
+  // });
 
-  return results;
+  return arpDevices;
 }
-
-module.exports = {
-  scanNetwork
-};

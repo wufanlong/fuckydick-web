@@ -13,6 +13,10 @@ module.exports = {
         from: 'public/',
         to: 'public',
         filter: ['**/*']
+      },
+      {
+        from: 'extra/nmap',
+        to: 'nmap'
       }
     ],
   },

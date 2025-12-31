@@ -1,8 +1,8 @@
 // scanner/port.js
-const net = require('net');
+import { net } from "net";
 
-function checkPort(ip, port, timeout = 300) {
-  return new Promise(resolve => {
+export function checkPort(ip, port, timeout = 300) {
+  return new Promise((resolve) => {
     const socket = new net.Socket();
     let done = false;
 
@@ -15,15 +15,15 @@ function checkPort(ip, port, timeout = 300) {
     };
 
     socket.setTimeout(timeout);
-    socket.once('connect', () => finish(true));
-    socket.once('timeout', () => finish(false));
-    socket.once('error', () => finish(false));
+    socket.once("connect", () => finish(true));
+    socket.once("timeout", () => finish(false));
+    socket.once("error", () => finish(false));
 
     socket.connect(port, ip);
   });
 }
 
-async function scanPorts(ip, ports) {
+export async function scanPorts(ip, ports) {
   const openPorts = [];
 
   for (const port of ports) {
@@ -34,7 +34,3 @@ async function scanPorts(ip, ports) {
 
   return openPorts;
 }
-
-module.exports = {
-  scanPorts
-};
