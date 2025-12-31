@@ -13,6 +13,8 @@ const devices = ref([])
 const scan = async () => {
   try {
     devices.value = await window.system.camera.scanDevices()
+    console.log(process.env.NODE_ENV)
+
   } catch (err) {
     console.error('扫描设备失败', err)
   }

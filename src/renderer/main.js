@@ -11,5 +11,4 @@ const vuetify = createVuetify({
     defaultTheme: 'light'
   }
 })
-console.log('Renderer process started')
 createApp(App).use(vuetify).use(router).mount('#app')

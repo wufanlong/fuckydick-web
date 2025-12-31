@@ -1,5 +1,6 @@
 import { BrowserWindow } from "electron";
 import { createWindow as createConfigWindow } from "./config.window.js";
+import path from 'node:path'
 const map = {};
 
 export default {
