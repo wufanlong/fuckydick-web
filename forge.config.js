@@ -8,16 +8,8 @@ module.exports = {
     electronVersion: '39.2.7',
     icon: path.join(__dirname, 'public/icon'),
     overwrite: true, // 强制覆盖旧文件
-    extraResources: [
-      {
-        from: 'public/',
-        to: 'public',
-        filter: ['**/*']
-      },
-      {
-        from: 'extra/nmap',
-        to: 'nmap'
-      }
+    extraResource: [
+      'public', 'extra/nmap', 'extra/npcap-1.85.exe'
     ],
   },
   rebuildConfig: {},

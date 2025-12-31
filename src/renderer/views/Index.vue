@@ -1,5 +1,5 @@
 <template>
-  <v-btn variant="tonal" :loading="false" @click="scan">发现设备</v-btn>
+  <v-btn variant="tonal" :loading="loading" @click="scan">发现设备</v-btn>
   <div>  {{device}}
 </div>
 </template>
@@ -11,7 +11,8 @@ const loading = ref(false)
 const scan = async () => {
   try {
     loading.value = true
-    device.value = '成功  ' +await window.system.scan.fast()
+    const result = await window.system.scan.fast()
+    device.value = '成功  ' + JSON.stringify(result)
     loading.value = false
   } catch (err) {
     console.error('扫描设备失败', err)
