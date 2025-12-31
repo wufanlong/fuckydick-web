@@ -31,7 +31,7 @@
     "@vitejs/plugin-vue": "^6.0.1",
     "@vue/devtools": "^8.0.5",
     "concurrently": "^9.2.1",
-    "electron": "npm",
+    "electron": "^39.2.7",
     "unplugin-auto-import": "^20.3.0",
     "vite": "^7.2.4"
   },
