@@ -11,7 +11,7 @@ const createWindow = () => {
   // 启动时最大化
   window.maximize();
   // Open the DevTools.
-  // window.webContents.openDevTools({ mode: 'detach' });
+  window.webContents.openDevTools({ mode: 'detach' });
 };
 
 app.whenReady().then(() => {

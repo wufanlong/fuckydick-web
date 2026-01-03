@@ -14,13 +14,13 @@ module.exports = {
   },
   rebuildConfig: {},
   makers: [
-    // {
-    //   name: '@electron-forge/maker-squirrel',
-    //   config: {
-    //     name: 'fuckydick_web',
-    //     setupIcon: path.join(__dirname, 'public/icon.ico'),
-    //   },
-    // },
+    {
+      name: '@electron-forge/maker-squirrel',
+      config: {
+        name: 'fuckydick_web',
+        setupIcon: path.join(__dirname, 'public/icon.ico'),
+      },
+    },
     {
       name: '@electron-forge/maker-zip',
       platforms: ['win32'],
