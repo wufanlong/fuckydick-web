@@ -7,6 +7,11 @@ const routes = [
     component: () => import('../views/Index.vue')
   },
   {
+    path: '/',
+    name: 'Home',
+    component: () => import('../views/Home.vue')
+  },
+  {
     path: '/config',
     name: 'Config',
     component: () => import('../views/config/Config.vue')

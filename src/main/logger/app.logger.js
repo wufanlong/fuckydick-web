@@ -1,7 +1,25 @@
 import log from 'electron-log';
+import path from 'path';
+import { app } from 'electron'
+import { fileURLToPath } from 'url';
+import fs from 'fs';
 
-// 配置日志（例如日志级别，文件路径等）
-log.transports.file.level = 'info'; // 设置日志文件的最低级别
-log.transports.console.level = 'debug'; // 设置控制台的最低级别
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+app.whenReady().then(() => {
+  const logDir = path.join(__dirname, '../logs');
 
-window.log = log
+  if (!fs.existsSync(logDir)) {
+    fs.mkdirSync(logDir, { recursive: true });
+  }
+
+  log.transports.file.resolvePathFn = () =>
+    path.join(logDir, 'main.log');
+
+  log.transports.file.level = 'info';
+  log.transports.console.level = 'debug';
+
+  log.info('Electron logger initialized');
+});
+
+export default log;

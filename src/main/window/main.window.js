@@ -10,6 +10,7 @@ const createWindow = () => {
   const window = windowManager.createWindow(options);
   // 启动时最大化
   window.maximize();
+  window.show();
   // Open the DevTools.
   window.webContents.openDevTools({ mode: 'detach' });
 };
