@@ -37,7 +37,11 @@
     "@tailwindcss/vite": "^4.1.18",
     "electron-log": "^5.4.3",
     "electron-squirrel-startup": "^1.0.1",
+<<<<<<< HEAD
     "node-nmap": "^4.0.0",
+=======
+    "node-nmap": "github:wufanlong/node-nmap#fix/service-undefined",
+>>>>>>> b1482a0ee658e0409d85507908fb29644b359563
     "tailwindcss": "^4.1.18",
     "vite-plugin-vuetify": "^2.1.2",
     "vue": "^3.5.24",
