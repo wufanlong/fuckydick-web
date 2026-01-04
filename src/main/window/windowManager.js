@@ -1,4 +1,4 @@
-import { BrowserWindow } from "electron";
+import { BrowserWindowzz } from "electron";
 import { createWindow as createConfigWindow } from "./config.window.js";
 import path from "node:path";
 import { windowsGlobalOptions } from "../config/app.config.js";

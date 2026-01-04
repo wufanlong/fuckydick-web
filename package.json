@@ -20,8 +20,6 @@
   "license": "MIT",
   "devDependencies": {
     "@electron-forge/cli": "^7.10.2",
-    "@electron-forge/maker-deb": "^7.10.2",
-    "@electron-forge/maker-rpm": "^7.10.2",
     "@electron-forge/maker-squirrel": "^7.10.2",
     "@electron-forge/maker-zip": "^7.10.2",
     "@electron-forge/plugin-auto-unpack-natives": "^7.10.2",
@@ -39,7 +37,6 @@
     "@tailwindcss/vite": "^4.1.18",
     "electron-log": "^5.4.3",
     "electron-squirrel-startup": "^1.0.1",
-    "nmap": "^1.1.0",
     "node-nmap": "^4.0.0",
     "tailwindcss": "^4.1.18",
     "vite-plugin-vuetify": "^2.1.2",

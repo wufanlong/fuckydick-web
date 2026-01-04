@@ -1,6 +1,5 @@
 import { app, BrowserWindow } from 'electron';
 import started from 'electron-squirrel-startup';
-import './main/bootstrap/index.js'
 import './main/index.js';
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
