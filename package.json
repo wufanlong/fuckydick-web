@@ -34,6 +34,8 @@
     "vite-plugin-static-copy": "^3.1.4"
   },
   "dependencies": {
+    "@fontsource/roboto": "^5.2.9",
+    "@mdi/font": "^7.4.47",
     "@tailwindcss/vite": "^4.1.18",
     "electron-log": "^5.4.3",
     "electron-squirrel-startup": "^1.0.1",

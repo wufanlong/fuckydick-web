@@ -55,6 +55,11 @@ function runNpcapInstaller() {
     })
 };
 
+export function isEnvsReady() {
+    log.info("Environment ready status check initiated")
+    return isNpcapIstalled();
+}
+
 app.whenReady().then(() => {
     runNpcapInstaller()
 })
