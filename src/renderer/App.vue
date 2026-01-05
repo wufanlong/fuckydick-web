@@ -3,11 +3,7 @@
 </template>
 
 <script setup>
-import { devtools } from '@vue/devtools'
-
-if(process.env.NODE_ENV.trim() === 'development') {
-    devtools.connect('http://localhost', 8098)
-}
+  
 </script>
 
 <style scoped>

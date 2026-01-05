@@ -9,7 +9,7 @@ if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
 nmap.nmapLocation = location;
 export function NmapScan(ip) {
   return new Promise((resolve, reject) => {
-    let quickscan = new nmap.NmapScan(ip, ['-PR', '-n']);
+    let quickscan = new nmap.NmapScan(ip, ['-n', '-Pn', '-p 80,443,554,5060,5061,8899,3702,8554,10554,1935,9000,8000,9010,37777,37778,37779', '--open']);
     quickscan.on("complete", function (data) {
       console.log(data)
       resolve(data);

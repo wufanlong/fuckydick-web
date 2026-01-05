@@ -42,17 +42,18 @@ const loading = ref(false)
 const scan = async () => {
   try {
     devices.value.length = 0
-    window.system.log.setFileLogLevel('debug');
+    // window.system.log.setFileLogLevel('debug');
     loading.value = true
+    const sm = new Date().getTime()
+    log.info('开始扫描设备，扫描ip段：', ip.value, '开始时间：', sm)
     const result = await window.system.scan.fast(ip.value)
+    const em = new Date().getTime()
+    log.info('扫描设备完成，结束时间：', em, '耗时：', em - sm + 'ms')
     log.debug('扫描设备结果', result, '\n设备总数' + result.length)
-    for (let i = 0; i < result.length; i++) {
-      result[i].selectable = true
-    }
     devices.value = result
     loading.value = false
     
-    window.system.log.setFileLogLevel('info');
+    // window.system.log.setFileLogLevel('info');
   } catch (err) {
     log.error('扫描设备失败', err)
     loading.value = false
