@@ -3,7 +3,7 @@
     <v-text-field class="w-[70%]" label="ip" v-model="ip"></v-text-field>
     <v-btn variant="tonal" :loading="loading" @click="scan">发现设备</v-btn>
   </div>
-  <v-data-table-virtual :headers="headers" :items="devices" :item-value="item => item.ip" item-selectable="selectable"
+  <v-data-table-virtual height="480" :headers="headers" :items="devices" :item-value="item => item.ip" item-selectable="selectable"
     v-model="selectedDevices" show-select fixed-header></v-data-table-virtual>
 </template>
 
@@ -36,7 +36,8 @@ const headers = ref([
 ])
 const devices = ref([])
 const selectedDevices = ref([])
-const ip = ref('172.30.0.1/24')
+const ip = ref('192.168.0.1/24')
+// const ip = ref('172.30.0.1/24')
 // const ip = ref('172.30.0.186')
 const loading = ref(false)
 const scan = async () => {
