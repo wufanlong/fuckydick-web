@@ -23,7 +23,7 @@ app.whenReady().then(() => {
     windowManager.getByName("mainWindow").webContents.send("log:loggingOnRenderer", message);
   }
 
-  log.transports.sendToRenderer.level = 'debug'
+  log.transports.sendToRenderer.level = 'info'
   log.transports.file.level = 'info';
   log.transports.console.level = 'debug';
 
