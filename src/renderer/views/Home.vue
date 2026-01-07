@@ -10,7 +10,6 @@
 
 <script setup name="Home">
 import log from 'electron-log/renderer'
-import ISAPIClient from 'isapi-js-client'
 const headers = ref([
   {
     title: 'ip',
@@ -113,9 +112,8 @@ const getSecurityCapabilities = async () => {
       log.error('Headers:', err.response.headers)
       log.error('Data:', err.response.data)
     } else {
-      log.error('Message:', err.message)
+      log.error('Message:', err)
     }
-    log.error('获取加密能力失败', err)
   })
 }
 </script>

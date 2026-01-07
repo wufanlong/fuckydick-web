@@ -1,15 +1,9 @@
 import { ipcMain } from "electron";
-import ISAPIClient from 'isapi-js-client'
+import {isapiSDK} from 'isapi-js-sdk'
 import log from 'electron-log/main'
-import { getIV, encryptionKey, aes128Encrypt } from '../../utils/encryption.js'
-
 ipcMain.handle("common:call", (_event, fName, ip) => {
-    log.info(fName, ip)
-    ISAPIClient.security.encryption.securityCapabilities()
+    const sdk = new isapiSDK(ip, 'admin', 'sszx123456')
     if (fName === 'securityCapabilities') {
-        const password = 'sszx123456'
-        const iv = getIV();
-        const encrypted = aes128Encrypt(password, iv)
-        return ISAPIClient.security.encryption.securityCapabilities(ip, {params:{username: 'admin',iv: iv.toString('hex'), password: encrypted, security: 1}})
+        return sdk.core.security.getSecurityCapabilities()
     }
 });
