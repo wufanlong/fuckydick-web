@@ -82,7 +82,7 @@ const selectedDevices = ref([])
 // const ip = ref('192.168.0.1/24')
 // const ip = ref('172.30.0.1/24')
 // const ip = ref('172.30.0.186')
-const ip = ref('192.168.1.1/24')
+const ip = ref('192.168.1.0/24')
 const loading = ref(false)
 const scan = async () => {
   try {
