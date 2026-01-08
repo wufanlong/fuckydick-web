@@ -1,9 +1,12 @@
 import { ipcMain } from "electron";
-import {isapiSDK} from 'isapi-js-sdk'
 import log from 'electron-log/main'
-ipcMain.handle("common:call", (_event, fName, ip) => {
-    const sdk = new isapiSDK(ip, 'admin', 'sszx123456')
+import { getSDKByIP } from "../camera/device.ipc.js";
+
+ipcMain.handle("common:call", (_event, ip, fName) => {
+    const sdk = getSDKByIP(ip)
     if (fName === 'securityCapabilities') {
         return sdk.core.security.getSecurityCapabilities()
+    } else if (fName === 'systemDeviceInfo') {
+        return sdk.core.system.getSystemDeviceInfo()
     }
 });
