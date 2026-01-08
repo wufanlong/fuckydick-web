@@ -82,7 +82,7 @@ const selectedDevices = ref([])
 // const ip = ref('192.168.0.1/24')
 // const ip = ref('172.30.0.1/24')
 // const ip = ref('172.30.0.186')
-const ip = ref('192.168.1.0/24')
+const ip = ref('192.168.1.64')
 const loading = ref(false)
 const scan = async () => {
   try {
@@ -106,15 +106,9 @@ const scan = async () => {
 }
 const getSecurityCapabilities = async () => {
   window.api.common.call('securityCapabilities', ip.value).then(res => {
-    log.info('获取加密能力成功', res)
+    log.info(ip.value, res)
   }).catch((err) => {
-    if (err.response) {
-      log.error('Status:', err.response.status)
-      log.error('Headers:', err.response.headers)
-      log.error('Data:', err.response.data)
-    } else {
-      log.error('Message:', err)
-    }
+    log.error(err)
   })
 }
 </script>
