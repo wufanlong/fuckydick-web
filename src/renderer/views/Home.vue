@@ -2,18 +2,21 @@
   <div class="flex justify-between items-center">
     <v-text-field class="w-[70%]" label="ip" v-model="ip"></v-text-field>
     <v-btn variant="tonal" :loading="loading" @click="scan">发现设备</v-btn>
-    <v-btn variant="tonal" @click="getDeviceInfo">获取设备信息</v-btn>
-    <v-btn variant="tonal" @click="getSecurityCapabilities">获取加密能力</v-btn>
   </div>
-  <v-data-table-virtual height="480" :headers="headers" :items="devices" :item-value="item => item.ip" item-selectable="selectable"
-    v-model="selectedDevices" show-select fixed-header></v-data-table-virtual>
+  <v-data-table-virtual height="480" :headers="headers" :items="devices" :item-value="item => item.ip"
+    item-selectable="selectable" v-model="selectedDevices" show-select fixed-header>
+    <template #item.op="{ item }">
+      <v-btn size="x-small" variant="tonal" @click="getDeviceInfo(item.ip)">获取设备信息</v-btn>
+      <v-btn size="x-small" variant="tonal" @click="getSecurityCapabilities(item.ip)">获取加密能力</v-btn>
+    </template>
+  </v-data-table-virtual>
 </template>
 
 <script setup name="Home">
 import log from 'electron-log/renderer'
 const headers = ref([
   {
-    title: 'ip',
+    title: 'IP',
     key: 'ip',
     sortable: true,
     align: 'center',
@@ -30,8 +33,8 @@ const headers = ref([
     }
   },
   {
-    title: '通道名称',
-    key: 'channelName',
+    title: '设备名称',
+    key: 'deviceName',
     sortable: true,
     align: 'center',
   },
@@ -55,7 +58,7 @@ const headers = ref([
   },
   {
     title: '设备型号',
-    key: 'deviceModel',
+    key: 'model',
     sortable: true,
     align: 'center',
   },
@@ -67,22 +70,53 @@ const headers = ref([
   },
   {
     title: 'mac',
-    key: 'mac',
+    key: 'macAddress',
+    sortable: true,
+    align: 'center',
+  },
+  {
+    title: '固件版本',
+    key: 'firmwareVersion',
+    sortable: true,
+    align: 'center',
+  },
+  {
+    title: '设备描述',
+    key: 'deviceDescription',
+    sortable: true,
+    align: 'center',
+  },
+  {
+    title: '设备类型',
+    key: 'deviceType',
+    sortable: true,
+    align: 'center',
+  },
+  {
+    title: '设备ID',
+    key: 'deviceID',
+    sortable: true,
+    align: 'center',
+  },
+  {
+    title: '操作',
+    key: 'op',
     sortable: true,
     align: 'center',
   },
 ])
 const devices = ref([])
 const selectedDevices = ref([])
-
-watch(devices, (newVal) => {
-  window.device.updateIsapiSDKInstance(newVal.map(d => d.ip))
-}, { deep: true })
+onMounted(() => {
+  window.device.onDeviceInfoUpdate((DeviceInfo) => {
+    Object.assign(devices.value.find(d => d.ip === DeviceInfo.ip) || {}, DeviceInfo)
+  })
+})
 
 // const ip = ref('192.168.0.1/24')
-// const ip = ref('172.30.0.1/24')
+const ip = ref('172.30.0.1/24')
 // const ip = ref('172.30.0.186')
-const ip = ref('192.168.1.64')
+// const ip = ref('192.168.1.64')
 const loading = ref(false)
 const scan = async () => {
   try {
@@ -96,21 +130,20 @@ const scan = async () => {
     log.debug('扫描设备结果', result, '\n设备总数' + result.length)
     devices.value.push(...result)
     loading.value = false
+    window.device.updateIsapiSDKInstance(devices.value.map(d => d.ip))
   } catch (err) {
     log.error('扫描设备失败', err)
     loading.value = false
   }
 }
-const getSecurityCapabilities = async () => {
-  window.api.common.call(ip.value, 'securityCapabilities').then(res => {
-    log.info(ip.value, res)
+const getSecurityCapabilities = async (ip) => {
+  window.api.common.call(ip, 'securityCapabilities').then(res => {
   }).catch((err) => {
     log.error(err)
   })
 }
-const getDeviceInfo = async () => {
-  window.api.common.call(ip.value, 'systemDeviceInfo').then(res => {
-    log.info(ip.value, res)
+const getDeviceInfo = async (ip) => {
+  window.api.common.call(ip, 'systemDeviceInfo').then(res => {
   }).catch((err) => {
     log.error(err)
   })

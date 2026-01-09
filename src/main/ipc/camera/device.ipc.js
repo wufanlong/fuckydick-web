@@ -1,17 +1,25 @@
 import { ipcMain } from "electron";
-import log from 'electron-log/main'
-import { isapiSDK } from 'isapi-js-sdk'
+import log from "electron-log/main";
+import { isapiSDK } from "isapi-js-sdk";
+import windowManager from "../../window/windowManager.js";
 
-const sdks = []
+const sdks = [];
 
 ipcMain.handle("device:updateIsapiSDKInstance", (_event, ips) => {
-    sdks.length = 0
-    ips.forEach(ip => {
-        const sdk = new isapiSDK(ip, 'admin', 'sszx123456')
-        sdks.push(sdk)
+  sdks.length = 0;
+  ips.forEach((ip) => {
+    const sdk = new isapiSDK(ip, "admin", "sszx123456");
+    sdk.init();
+    sdks.push(sdk);
+    sdk.on("deviceInfo", (DeviceInfo) => {
+      DeviceInfo.ip = ip;
+      windowManager
+        .getByName("mainWindow")
+        .webContents.send("deviceInfo:update", DeviceInfo);
     });
+  });
 });
 
 export function getSDKByIP(ip) {
-    return sdks.find(sdk => sdk.context.ip === ip)
+  return sdks.find((sdk) => sdk.ip === ip);
 }

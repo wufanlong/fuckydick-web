@@ -11,7 +11,6 @@ export function NmapScan(ip) {
   return new Promise((resolve, reject) => {
     let quickscan = new nmap.NmapScan(ip, '-n -p 80,554,8000 --max-rate 100 --host-timeout 0');
     quickscan.on("complete", function (data) {
-      console.log(data)
       resolve(data);
     });
 
