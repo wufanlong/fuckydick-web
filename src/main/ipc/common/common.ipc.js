@@ -8,5 +8,7 @@ ipcMain.handle("common:call", (_event, ip, fName) => {
         return sdk.core.security.getSecurityCapabilities()
     } else if (fName === 'systemDeviceInfo') {
         return sdk.core.system.getSystemDeviceInfo()
+    } else if (fName === 'getSystemNetworkInterfaces') {
+        return sdk.core.system.getSystemNetworkInterfaces()
     }
 });

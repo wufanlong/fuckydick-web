@@ -11,12 +11,13 @@ ipcMain.handle("device:updateIsapiSDKInstance", (_event, ips) => {
     const sdk = new isapiSDK(ip, "admin", "sszx123456");
     sdk.init();
     sdks.push(sdk);
-    sdk.on("deviceInfo", (DeviceInfo) => {
+    sdk.on("deviceInitd", (DeviceInfo) => {
       DeviceInfo.ip = ip;
       windowManager
         .getByName("mainWindow")
-        .webContents.send("deviceInfo:update", DeviceInfo);
+        .webContents.send("deviceInitd", DeviceInfo);
     });
+
   });
 });
 

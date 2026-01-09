@@ -108,14 +108,14 @@ const headers = ref([
 const devices = ref([])
 const selectedDevices = ref([])
 onMounted(() => {
-  window.device.onDeviceInfoUpdate((DeviceInfo) => {
+  window.device.onDeviceInitd((DeviceInfo) => {
     Object.assign(devices.value.find(d => d.ip === DeviceInfo.ip) || {}, DeviceInfo)
   })
 })
 
 // const ip = ref('192.168.0.1/24')
-const ip = ref('172.30.0.1/24')
-// const ip = ref('172.30.0.186')
+// const ip = ref('172.30.0.1/24')
+const ip = ref('172.30.0.186')
 // const ip = ref('192.168.1.64')
 const loading = ref(false)
 const scan = async () => {
@@ -138,12 +138,14 @@ const scan = async () => {
 }
 const getSecurityCapabilities = async (ip) => {
   window.api.common.call(ip, 'securityCapabilities').then(res => {
+    log.debug(ip, res)
   }).catch((err) => {
     log.error(err)
   })
 }
 const getDeviceInfo = async (ip) => {
   window.api.common.call(ip, 'systemDeviceInfo').then(res => {
+    log.debug(ip, res)
   }).catch((err) => {
     log.error(err)
   })
