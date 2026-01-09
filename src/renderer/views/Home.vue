@@ -3,11 +3,45 @@
     <v-text-field class="w-[70%]" label="ip" v-model="ip"></v-text-field>
     <v-btn variant="tonal" :loading="loading" @click="scan">发现设备</v-btn>
   </div>
-  <v-data-table-virtual height="480" :headers="headers" :items="devices" :item-value="item => item.ip"
-    item-selectable="selectable" v-model="selectedDevices" show-select fixed-header>
-    <template #item.op="{ item }">
-      <v-btn size="x-small" variant="tonal" @click="getDeviceInfo(item.ip)">获取设备信息</v-btn>
-      <v-btn size="x-small" variant="tonal" @click="getSecurityCapabilities(item.ip)">获取加密能力</v-btn>
+  <v-data-table-virtual multi-sort expand-on-click :loading="loading" hover striped="even" density="compact" height="480"
+    :headers="headers" :items="devices" :item-value="item => item.ip" fixed-header>
+    <template v-slot:loading>
+      <v-skeleton-loader type="table-row@10"></v-skeleton-loader>
+    </template>
+    <template v-slot:item.data-table-expand="{ internalItem, isExpanded, toggleExpand }">
+      <v-btn :append-icon="isExpanded(internalItem) ? 'mdi-chevron-up' : 'mdi-chevron-down'"
+        :text="isExpanded(internalItem) ? '收起' : '更多'" class="text-none" color="medium-emphasis" size="small"
+        variant="text" width="105" border slim @click="toggleExpand(internalItem)"></v-btn>
+    </template>
+    <template v-slot:expanded-row="{ columns, item }">
+      <tr>
+        <td :colspan="columns.length" class="py-2">
+          <v-sheet rounded="lg" border>
+            <v-btn size="x-small" variant="tonal" @click="getDeviceInfo(item.ip)">获取设备信息</v-btn>
+            <v-btn size="x-small" variant="tonal" @click="getSecurityCapabilities(item.ip)">获取加密能力</v-btn>
+            <v-table density="compact">
+              <tbody class="bg-surface-light">
+                <tr>
+                  <th>Rating</th>
+                  <th>Synopsis</th>
+                  <th>Cast</th>
+                </tr>
+              </tbody>
+
+              <tbody>
+                <tr>
+                  <td class="py-2">
+                    <v-rating :model-value="item.model" color="orange-darken-2" density="comfortable" size="small"
+                      half-increments readonly></v-rating>
+                  </td>
+                  <td class="py-2">{{ item.subnetMask }}</td>
+                  <td class="py-2">{{ item.ip }}</td>
+                </tr>
+              </tbody>
+            </v-table>
+          </v-sheet>
+        </td>
+      </tr>
     </template>
   </v-data-table-virtual>
 </template>
@@ -19,6 +53,7 @@ const headers = ref([
     title: 'IP',
     key: 'ip',
     sortable: true,
+    nowrap: true,
     align: 'center',
     sort: (a, b) => {
       const pa = a.split('.').map(Number)
@@ -37,72 +72,77 @@ const headers = ref([
     key: 'deviceName',
     sortable: true,
     align: 'center',
+    nowrap: true,
   },
   {
     title: 'OSD',
     key: 'osd',
     sortable: true,
     align: 'center',
+    nowrap: true,
   },
   {
     title: '子网掩码',
     key: 'subnetMask',
     sortable: true,
     align: 'center',
+    nowrap: true,
   },
   {
     title: '网关',
     key: 'gateway',
     sortable: true,
     align: 'center',
+    nowrap: true,
   },
   {
     title: '设备型号',
     key: 'model',
     sortable: true,
     align: 'center',
+    nowrap: true,
   },
   {
     title: '序列号',
     key: 'serialNumber',
     sortable: true,
     align: 'center',
+    nowrap: true,
   },
   {
     title: 'mac',
     key: 'macAddress',
     sortable: true,
     align: 'center',
+    nowrap: true,
   },
   {
     title: '固件版本',
     key: 'firmwareVersion',
     sortable: true,
     align: 'center',
+    nowrap: true,
   },
   {
     title: '设备描述',
     key: 'deviceDescription',
     sortable: true,
     align: 'center',
+    nowrap: true,
   },
   {
     title: '设备类型',
     key: 'deviceType',
     sortable: true,
     align: 'center',
+    nowrap: true,
   },
   {
     title: '设备ID',
     key: 'deviceID',
     sortable: true,
     align: 'center',
-  },
-  {
-    title: '操作',
-    key: 'op',
-    sortable: true,
-    align: 'center',
+    nowrap: true,
   },
 ])
 const devices = ref([])
@@ -113,11 +153,14 @@ onMounted(() => {
   })
 })
 
-// const ip = ref('192.168.0.1/24')
+const ip = ref('192.168.1.1/24')
 // const ip = ref('172.30.0.1/24')
-const ip = ref('172.30.0.186')
+// const ip = ref('172.30.0.186')
 // const ip = ref('192.168.1.64')
 const loading = ref(false)
+const selectAll = () => {
+  selectedDevices.value = devices.value.map(d => d.ip)
+}
 const scan = async () => {
   try {
     devices.value.length = 0
@@ -129,6 +172,8 @@ const scan = async () => {
     log.info('扫描设备完成，耗时：', em - sm + 'ms')
     log.debug('扫描设备结果', result, '\n设备总数' + result.length)
     devices.value.push(...result)
+    for (let i = 0; i < 100; i++) {
+    }
     loading.value = false
     window.device.updateIsapiSDKInstance(devices.value.map(d => d.ip))
   } catch (err) {
