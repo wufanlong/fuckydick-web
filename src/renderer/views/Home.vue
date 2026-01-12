@@ -151,16 +151,17 @@ onMounted(() => {
   window.device.onDeviceInitd((DeviceInfo) => {
     Object.assign(devices.value.find(d => d.ip === DeviceInfo.ip) || {}, DeviceInfo)
   })
+  window.device.onDeviceInitFailed((ip) => {
+    devices.value = devices.value.filter(d => d.ip !== ip)
+  })
+  scan()
 })
 
-const ip = ref('192.168.1.1/24')
-// const ip = ref('172.30.0.1/24')
+// const ip = ref('192.168.1.1/24')
+const ip = ref('172.30.0.1/24')
 // const ip = ref('172.30.0.186')
 // const ip = ref('192.168.1.64')
 const loading = ref(false)
-const selectAll = () => {
-  selectedDevices.value = devices.value.map(d => d.ip)
-}
 const scan = async () => {
   try {
     devices.value.length = 0
@@ -170,7 +171,7 @@ const scan = async () => {
     const result = await window.system.scan.fast(ip.value)
     const em = new Date().getTime()
     log.info('扫描设备完成，耗时：', em - sm + 'ms')
-    log.debug('扫描设备结果', result, '\n设备总数' + result.length)
+    log.silly('扫描设备结果', result, '\n设备总数' + result.length)
     devices.value.push(...result)
     for (let i = 0; i < 100; i++) {
     }
