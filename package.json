@@ -36,10 +36,11 @@
   "dependencies": {
     "@fontsource/roboto": "^5.2.9",
     "@mdi/font": "^7.4.47",
+    "@network-utils/ip-range": "^1.0.2",
     "@tailwindcss/vite": "^4.1.18",
     "electron-log": "^5.4.3",
     "electron-squirrel-startup": "^1.0.1",
-    "isapi-js-sdk": "file:C:\\Users\\heting\\isapi-js-sdk",
+    "isapi-js-sdk": "file:C:\\Users\\DannyChan\\Desktop\\wufanlong\\project\\isapi-js-sdk",
     "node-nmap": "github:wufanlong/node-nmap#fix/service-undefined",
     "tailwindcss": "^4.1.18",
     "vite-plugin-vuetify": "^2.1.2",

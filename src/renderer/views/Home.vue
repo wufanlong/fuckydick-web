@@ -149,7 +149,9 @@ const devices = ref([])
 const selectedDevices = ref([])
 onMounted(() => {
   window.device.onDeviceInitd((DeviceInfo) => {
-    Object.assign(devices.value.find(d => d.ip === DeviceInfo.ip) || {}, DeviceInfo)
+    if (!devices.value.find(d => d.ip === DeviceInfo.ip)) {
+      devices.value.push(DeviceInfo)
+    }
   })
   window.device.onDeviceInitFailed((ip) => {
     devices.value = devices.value.filter(d => d.ip !== ip)
@@ -157,26 +159,36 @@ onMounted(() => {
   scan()
 })
 
-// const ip = ref('192.168.1.1/24')
-const ip = ref('172.30.0.1/24')
+// const ip = ref('192.168.1.0/24')
+const ip = ref('172.30.0.0/24')
 // const ip = ref('172.30.0.186')
 // const ip = ref('192.168.1.64')
 const loading = ref(false)
+// const scan = async () => {
+//   try {
+//     devices.value.length = 0
+//     loading.value = true
+//     const sm = new Date().getTime()
+//     log.info('开始扫描设备，扫描ip段：', ip.value)
+//     const result = await window.system.scan.fast(ip.value)
+//     const em = new Date().getTime()
+//     log.info('扫描设备完成，耗时：', em - sm + 'ms')
+//     log.silly('扫描设备结果', result, '\n设备总数' + result.length)
+//     devices.value.push(...result)
+//     loading.value = false
+//     window.device.updateIsapiSDKInstance(devices.value.map(d => d.ip))
+//   } catch (err) {
+//     log.error('扫描设备失败', err)
+//     loading.value = false
+//   }
+// }
 const scan = async () => {
   try {
     devices.value.length = 0
     loading.value = true
-    const sm = new Date().getTime()
     log.info('开始扫描设备，扫描ip段：', ip.value)
-    const result = await window.system.scan.fast(ip.value)
-    const em = new Date().getTime()
-    log.info('扫描设备完成，耗时：', em - sm + 'ms')
-    log.silly('扫描设备结果', result, '\n设备总数' + result.length)
-    devices.value.push(...result)
-    for (let i = 0; i < 100; i++) {
-    }
+    await window.system.scan.fast(ip.value)
     loading.value = false
-    window.device.updateIsapiSDKInstance(devices.value.map(d => d.ip))
   } catch (err) {
     log.error('扫描设备失败', err)
     loading.value = false

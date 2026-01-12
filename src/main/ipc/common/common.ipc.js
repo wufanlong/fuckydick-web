@@ -1,6 +1,6 @@
 import { ipcMain } from "electron";
 import log from 'electron-log/main'
-import { getSDKByIP } from "../camera/device.ipc.js";
+import { getSDKByIP } from "../../device/factory/index.js";
 
 ipcMain.handle("common:call", (_event, ip, fName) => {
     const sdk = getSDKByIP(ip)
