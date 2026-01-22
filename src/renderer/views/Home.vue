@@ -75,8 +75,8 @@ const headers = ref([
     nowrap: true,
   },
   {
-    title: 'OSD',
-    key: 'osd',
+    title: '通道名称',
+    key: 'channelName',
     sortable: true,
     align: 'center',
     nowrap: true,
@@ -146,7 +146,6 @@ const headers = ref([
   },
 ])
 const devices = ref([])
-const selectedDevices = ref([])
 onMounted(() => {
   window.device.onDeviceInitd((DeviceInfo) => {
     if (!devices.value.find(d => d.ip === DeviceInfo.ip)) {
