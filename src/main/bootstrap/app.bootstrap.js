@@ -1,7 +1,10 @@
 import { app, BrowserWindow } from 'electron';
 import path from 'path';
-import { exec } from 'child_process';
+import { exec, spawn } from 'child_process';
 import log from '../logger/app.logger.js'
+
+let zlmProcess = null
+
 
 function isNpcapIstalled() {
     return new Promise((resolve, reject) => {
@@ -55,11 +58,42 @@ function runNpcapInstaller() {
     })
 };
 
+function runZLMediaKit() {
+    if (zlmProcess) return
+
+  // Electron resourcesPath 指向打包资源目录
+  let zlmPath;
+  if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
+      zlmPath = path.join(__dirname, '../../extra/ZLMediaKit/MediaServer.exe');
+  } else {
+      zlmPath = path.join(process.resourcesPath, 'ZLMediaKit/MediaServer.exe')
+  }
+  zlmProcess = spawn(zlmPath, [], {
+    cwd: path.dirname(zlmPath),
+    windowsHide: false // 不显示控制台
+  })
+
+  zlmProcess.stdout.on('data', (data) => {
+    console.log('ZLM:', data.toString())
+  })
+
+  zlmProcess.stderr.on('data', (data) => {
+    console.error('ZLM error:', data.toString())
+  })
+
+  zlmProcess.on('exit', () => {
+    console.log('ZLMediaKit exited')
+    zlmProcess = null
+  })
+}
+
 export function isEnvsReady() {
     log.info("Environment ready status check initiated")
-    return isNpcapIstalled();
+    const isZlmExist = zlmProcess ? true : false
+    return isNpcapIstalled() && isZlmExist
 }
 
 app.whenReady().then(() => {
     runNpcapInstaller()
+    runZLMediaKit()
 })

@@ -9,7 +9,7 @@ module.exports = {
     icon: path.join(__dirname, 'public/icon'),
     overwrite: true, // 强制覆盖旧文件
     extraResource: [
-      'public', 'extra/nmap', 'extra/npcap-1.85.exe'
+      'public', 'extra/nmap', 'extra/npcap-1.85.exe', 'extra/ZLMediaKit'
     ],
   },
   rebuildConfig: {},

@@ -3,6 +3,7 @@
     <v-text-field class="w-[70%]" label="ip" v-model="ip"></v-text-field>
     <v-btn variant="tonal" :loading="loading" @click="scan">发现设备</v-btn>
   </div>
+  <StreamPlayer class="w-1/2 h-1/2" streamId="cam101" />
   <v-data-table-virtual multi-sort expand-on-click :loading="loading" hover striped="even" density="compact" height="480"
     :headers="headers" :items="devices" :item-value="item => item.ip" fixed-header>
     <template v-slot:loading>
@@ -48,6 +49,7 @@
 
 <script setup name="Home">
 import log from 'electron-log/renderer'
+import StreamPlayer from '../components/stream/StreamPlayer.vue'
 const headers = ref([
   {
     title: 'IP',
