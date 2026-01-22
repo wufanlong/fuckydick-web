@@ -21,10 +21,10 @@ module.exports = {
         setupIcon: path.join(__dirname, 'public/icon.ico'),
       },
     },
-    {
-      name: '@electron-forge/maker-zip',
-      platforms: ['win32'],
-    },
+    // {
+    //   name: '@electron-forge/maker-zip',
+    //   platforms: ['win32'],
+    // },
   ],
   plugins: [
     {

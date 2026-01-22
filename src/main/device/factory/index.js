@@ -25,7 +25,7 @@ export function createDevice(ip) {
   return sdk;
 }
 export function batchCreateDevices(ips) {
-  const sdks = [];
+  sdks.length = 0;
   for (let i = 0; i < ips.length; i++) {
     sdks.push(createDevice(ips[i]));
   }
