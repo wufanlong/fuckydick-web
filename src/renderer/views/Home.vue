@@ -181,7 +181,7 @@ const nmapScan = async () => {
     devices.value.length = 0
     loading.value = true
     const sm = new Date().getTime()
-    log.info('开始扫描设备，扫描ip段：', ip.value)
+    log.info('开始扫描设备：', ip.value)
     const result = await window.system.nmapScan.fast(ip.value)
     const em = new Date().getTime()
     log.info('扫描设备完成，耗时：', em - sm + 'ms')
@@ -198,7 +198,7 @@ const scan = async () => {
   try {
     devices.value.length = 0
     loading.value = true
-    log.info('开始扫描设备，扫描ip段：', ip.value)
+    log.info('开始扫描设备：', ip.value)
     await window.system.scan.fast(ip.value)
     loading.value = false
   } catch (err) {

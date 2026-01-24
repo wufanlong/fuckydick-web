@@ -1,8 +1,5 @@
 import { NmapScan } from "./nmap.js";
-import { ipcMain } from "electron";
 import log from "electron-log/main";
-import { isapiSDK } from "isapi-js-sdk";
-import windowManager from "../window/windowManager.js";
 import { batchCreateDevices } from '../device/factory/index.js'
 import { parseRange } from '@network-utils/ip-range'
 export async function nmapFastScan(ip) {
@@ -10,5 +7,6 @@ export async function nmapFastScan(ip) {
   return devices;
 }
 export async function fastScan(ips) {
-  batchCreateDevices(parseRange(ips))
+  const ipv4Regex = /^(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)){3}$/;
+  batchCreateDevices(ipv4Regex.test(ips) ? [ips] : parseRange(ips))
 }
