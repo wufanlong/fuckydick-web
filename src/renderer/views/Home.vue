@@ -2,10 +2,14 @@
   <div class="flex justify-between items-center">
     <v-text-field class="w-[70%]" label="ip" v-model="ip"></v-text-field>
     <v-btn variant="tonal" :loading="loading" @click="scan">发现设备</v-btn>
+    <!-- <v-btn variant="tonal" :loading="loading" @click="nmapScan">nmap发现设备</v-btn> -->
   </div>
   <StreamPlayer class="w-1/2 h-1/2" streamId="cam101" />
   <v-data-table-virtual multi-sort expand-on-click :loading="loading" hover striped="even" density="compact" height="480"
     :headers="headers" :items="devices" :item-value="item => item.ip" fixed-header>
+    <template v-slot:item.status="{ value }">
+      {{ value ? value : "未激活" }}
+    </template>
     <template v-slot:loading>
       <v-skeleton-loader type="table-row@10"></v-skeleton-loader>
     </template>
@@ -51,6 +55,13 @@
 import log from 'electron-log/renderer'
 import StreamPlayer from '../components/stream/StreamPlayer.vue'
 const headers = ref([
+  {
+    title: '状态',
+    key: 'status',
+    sortable: true,
+    align: 'center',
+    nowrap: true,
+  },
   {
     title: 'IP',
     key: 'ip',
@@ -160,29 +171,29 @@ onMounted(() => {
   scan()
 })
 
-// const ip = ref('192.168.1.0/24')
-const ip = ref('172.30.0.0/24')
+const ip = ref('192.168.1.0/24')
+// const ip = ref('172.30.0.0/24')
 // const ip = ref('172.30.0.186')
 // const ip = ref('192.168.1.64')
 const loading = ref(false)
-// const scan = async () => {
-//   try {
-//     devices.value.length = 0
-//     loading.value = true
-//     const sm = new Date().getTime()
-//     log.info('开始扫描设备，扫描ip段：', ip.value)
-//     const result = await window.system.scan.fast(ip.value)
-//     const em = new Date().getTime()
-//     log.info('扫描设备完成，耗时：', em - sm + 'ms')
-//     log.silly('扫描设备结果', result, '\n设备总数' + result.length)
-//     devices.value.push(...result)
-//     loading.value = false
-//     window.device.updateIsapiSDKInstance(devices.value.map(d => d.ip))
-//   } catch (err) {
-//     log.error('扫描设备失败', err)
-//     loading.value = false
-//   }
-// }
+const nmapScan = async () => {
+  try {
+    devices.value.length = 0
+    loading.value = true
+    const sm = new Date().getTime()
+    log.info('开始扫描设备，扫描ip段：', ip.value)
+    const result = await window.system.nmapScan.fast(ip.value)
+    const em = new Date().getTime()
+    log.info('扫描设备完成，耗时：', em - sm + 'ms')
+    log.silly('扫描设备结果', result, '\n设备总数' + result.length)
+    devices.value.push(...result)
+    loading.value = false
+    window.device.updateIsapiSDKInstance(devices.value.map(d => d.ip))
+  } catch (err) {
+    log.error('扫描设备失败', err)
+    loading.value = false
+  }
+}
 const scan = async () => {
   try {
     devices.value.length = 0

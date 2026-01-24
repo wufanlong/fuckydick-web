@@ -12,7 +12,7 @@ const props = defineProps({
 })
 const app = 'live'  // ZLM 默认应用名
 const pull = async () => {
-  const url = "rtsp://admin:sszx123456@172.30.0.186:554/Streaming/Channels/101"
+  const url = "rtsp://admin:sszx123456@192.168.1.64:554/Streaming/Channels/101"
   const response = await fetch(`http://127.0.0.1/index/api/addStreamProxy?app=${app}&stream=${props.streamId}&type=play&secret=aev5nuiInWrzIEKJMJc5suXzE6nhIdgI&vhost=__defaultVhost__&url=${url}`)
   return response
 }
@@ -42,7 +42,6 @@ const play = async () => {
         let answer = {};
         answer.sdp = ret.sdp;
         answer.type = 'answer';
-        log.info('answer:', ret.sdp);
         pc.setRemoteDescription(answer).then(() => {
           log.info('播放成功');
         }).catch(e => {

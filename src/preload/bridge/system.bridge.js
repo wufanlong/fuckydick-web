@@ -4,6 +4,9 @@ contextBridge.exposeInMainWorld('system', {
   scan: {
     fast: (ip) => ipcRenderer.invoke('scan:fast', ip)
   },
+  nmapScan: {
+    fast: (ip) => ipcRenderer.invoke('nmapScan:fast', ip)
+  },
   bootstrap: {
     isEnvsReady: () => ipcRenderer.invoke('bootstrap:isEnvsReady')
   },
