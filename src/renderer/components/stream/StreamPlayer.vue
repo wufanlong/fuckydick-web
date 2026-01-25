@@ -8,16 +8,19 @@ import log from 'electron-log/renderer'
 
 const videoEl = ref(null)
 const props = defineProps({
-  streamId: String,
 })
 const app = 'live'  // ZLM 默认应用名
-const pull = async () => {
-  const url = "rtsp://admin:sszx123456@192.168.1.64:554/Streaming/Channels/101"
-  const response = await fetch(`http://127.0.0.1/index/api/addStreamProxy?app=${app}&stream=${props.streamId}&type=play&secret=aev5nuiInWrzIEKJMJc5suXzE6nhIdgI&vhost=__defaultVhost__&url=${url}`)
+let pc;
+const pull = async (ip) => {
+  const url = `rtsp://admin:sszx123456@${ip}:554/Streaming/Channels/101`
+  const response = await fetch(`http://127.0.0.1/index/api/addStreamProxy?app=${app}&stream=${ip}&type=play&secret=aev5nuiInWrzIEKJMJc5suXzE6nhIdgI&vhost=__defaultVhost__&url=${url}`)
   return response
 }
-const play = async () => {
-  const pc = new RTCPeerConnection({
+const play = async (ip) => {
+  if (pc) {
+    stop()
+  }
+  pc = new RTCPeerConnection({
     iceServers: [] // 可加 STUN/TURN
   })
 
@@ -28,7 +31,7 @@ const play = async () => {
   pc.addTransceiver('audio', { direction: 'recvonly' })
   pc.createOffer().then((desc) => {
     pc.setLocalDescription(desc).then(() => {
-      fetch(`http://127.0.0.1/index/api/webrtc?app=${app}&stream=${props.streamId}&type=play`, {
+      fetch(`http://127.0.0.1/index/api/webrtc?app=${app}&stream=${ip}&type=play`, {
         method: 'POST',
         headers: {
           'Content-Type': 'text/plain;charset=utf-8'
@@ -53,8 +56,32 @@ const play = async () => {
     debug.error(e);
   });
 }
+const start = async (ip) => {
+  await pull(ip)
+  play(ip)
+}
+const stop = () => {
+  // 1. 停止所有 track
+  if (videoEl.value?.srcObject) {
+    videoEl.value.srcObject.getTracks().forEach(track => {
+      track.stop();
+    });
+    videoEl.value.srcObject = null;
+  }
+  
+  // 2. 关闭 PeerConnection
+  if (pc) {
+    pc.ontrack = null;
+    pc.close();
+    pc = null;
+  }
+  
+  console.log('已停止播放');
+}
+defineExpose({
+  start,
+  stop
+})
 onMounted(async () => {
-  await pull()
-  play()
 })
 </script>

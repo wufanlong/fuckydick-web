@@ -4,7 +4,7 @@
     <v-btn variant="tonal" :loading="loading" @click="scan">发现设备</v-btn>
     <!-- <v-btn variant="tonal" :loading="loading" @click="nmapScan">nmap发现设备</v-btn> -->
   </div>
-  <StreamPlayer class="w-1/2 h-1/2" streamId="cam101" />
+  <StreamPlayer ref="player" class="w-1/2 h-1/2"/>
   <v-data-table-virtual multi-sort expand-on-click :loading="loading" hover striped="even" density="compact" height="480"
     :headers="headers" :items="devices" :item-value="item => item.ip" fixed-header>
     <template v-slot:loading>
@@ -18,6 +18,8 @@
     <template v-slot:expanded-row="{ columns, item }">
       <tr>
         <td :colspan="columns.length" class="py-2">
+          <v-btn size="x-small" variant="tonal" @click="preview(item.ip)">预览</v-btn>
+          <v-btn size="x-small" variant="tonal" @click="stopPreview(item.ip)">停止预览</v-btn>
           <v-btn size="x-small" variant="tonal" @click="getDeviceInfo(item.ip)">获取设备信息</v-btn>
           <v-btn size="x-small" variant="tonal" @click="getSecurityCapabilities(item.ip)">获取加密能力</v-btn>
           <v-btn size="x-small" variant="tonal" @click="activate(item.ip)">激活</v-btn>
@@ -135,6 +137,7 @@ const headers = ref([
   },
 ])
 const devices = ref([])
+const player = ref(null)
 onMounted(() => {
   window.device.onDeviceUpdated((device) => {
     const d = devices.value.find(d => d.ip === device.ip)
@@ -185,6 +188,13 @@ const scan = async () => {
     loading.value = false
   }
 }
+
+const preview = async (ip) => {
+  player.value.start(ip)
+}
+const stopPreview = (ip) => {
+  player.value.stop(ip)
+}
 const getSecurityCapabilities = async (ip) => {
   window.api.common.call(ip, 'securityCapabilities').then(res => {
     log.debug(ip, res)
@@ -201,7 +211,7 @@ const getDeviceInfo = async (ip) => {
 }
 const activate = async (ip) => {
   window.api.common.call(ip, 'activate').then(res => {
-    log.info(res)
+    log.debug(res)
   }).catch(err => {
     log.error(err)
   })
