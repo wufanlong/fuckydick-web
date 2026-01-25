@@ -10,5 +10,7 @@ ipcMain.handle("common:call", (_event, ip, fName) => {
         return sdk.core.system.getSystemDeviceInfo()
     } else if (fName === 'getSystemNetworkInterfaces') {
         return sdk.core.system.getSystemNetworkInterfaces()
+    } else if (fName === 'activate') {
+        return sdk.core.system.activate()
     }
 });

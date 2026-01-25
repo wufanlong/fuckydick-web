@@ -7,9 +7,6 @@
   <StreamPlayer class="w-1/2 h-1/2" streamId="cam101" />
   <v-data-table-virtual multi-sort expand-on-click :loading="loading" hover striped="even" density="compact" height="480"
     :headers="headers" :items="devices" :item-value="item => item.ip" fixed-header>
-    <template v-slot:item.status="{ value }">
-      {{ value ? value : "未激活" }}
-    </template>
     <template v-slot:loading>
       <v-skeleton-loader type="table-row@10"></v-skeleton-loader>
     </template>
@@ -21,30 +18,9 @@
     <template v-slot:expanded-row="{ columns, item }">
       <tr>
         <td :colspan="columns.length" class="py-2">
-          <v-sheet rounded="lg" border>
-            <v-btn size="x-small" variant="tonal" @click="getDeviceInfo(item.ip)">获取设备信息</v-btn>
-            <v-btn size="x-small" variant="tonal" @click="getSecurityCapabilities(item.ip)">获取加密能力</v-btn>
-            <v-table density="compact">
-              <tbody class="bg-surface-light">
-                <tr>
-                  <th>Rating</th>
-                  <th>Synopsis</th>
-                  <th>Cast</th>
-                </tr>
-              </tbody>
-
-              <tbody>
-                <tr>
-                  <td class="py-2">
-                    <v-rating :model-value="item.model" color="orange-darken-2" density="comfortable" size="small"
-                      half-increments readonly></v-rating>
-                  </td>
-                  <td class="py-2">{{ item.subnetMask }}</td>
-                  <td class="py-2">{{ item.ip }}</td>
-                </tr>
-              </tbody>
-            </v-table>
-          </v-sheet>
+          <v-btn size="x-small" variant="tonal" @click="getDeviceInfo(item.ip)">获取设备信息</v-btn>
+          <v-btn size="x-small" variant="tonal" @click="getSecurityCapabilities(item.ip)">获取加密能力</v-btn>
+          <v-btn size="x-small" variant="tonal" @click="activate(item.ip)">激活</v-btn>
         </td>
       </tr>
     </template>
@@ -82,77 +58,77 @@ const headers = ref([
   },
   {
     title: '设备名称',
-    key: 'deviceName',
+    key: 'DeviceInfo.deviceName',
     sortable: true,
     align: 'center',
     nowrap: true,
   },
   {
     title: '通道名称',
-    key: 'channelName',
+    key: 'VideoInputChannel.name',
     sortable: true,
     align: 'center',
     nowrap: true,
   },
   {
     title: '子网掩码',
-    key: 'subnetMask',
+    key: 'NetworkInterfaceList.NetworkInterface.IPAddress.subnetMask',
     sortable: true,
     align: 'center',
     nowrap: true,
   },
   {
     title: '网关',
-    key: 'gateway',
+    key: 'NetworkInterfaceList.NetworkInterface.IPAddress.DefaultGateway.ipAddress',
     sortable: true,
     align: 'center',
     nowrap: true,
   },
   {
     title: '设备型号',
-    key: 'model',
+    key: 'DeviceInfo.model',
     sortable: true,
     align: 'center',
     nowrap: true,
   },
   {
     title: '序列号',
-    key: 'serialNumber',
+    key: 'DeviceInfo.serialNumber',
     sortable: true,
     align: 'center',
     nowrap: true,
   },
   {
     title: 'mac',
-    key: 'macAddress',
+    key: 'DeviceInfo.macAddress',
     sortable: true,
     align: 'center',
     nowrap: true,
   },
   {
     title: '固件版本',
-    key: 'firmwareVersion',
+    key: 'DeviceInfo.firmwareVersion',
     sortable: true,
     align: 'center',
     nowrap: true,
   },
   {
     title: '设备描述',
-    key: 'deviceDescription',
+    key: 'DeviceInfo.deviceDescription',
     sortable: true,
     align: 'center',
     nowrap: true,
   },
   {
     title: '设备类型',
-    key: 'deviceType',
+    key: 'DeviceInfo.deviceType',
     sortable: true,
     align: 'center',
     nowrap: true,
   },
   {
     title: '设备ID',
-    key: 'deviceID',
+    key: 'DeviceInfo.deviceID',
     sortable: true,
     align: 'center',
     nowrap: true,
@@ -160,9 +136,12 @@ const headers = ref([
 ])
 const devices = ref([])
 onMounted(() => {
-  window.device.onDeviceInitd((DeviceInfo) => {
-    if (!devices.value.find(d => d.ip === DeviceInfo.ip)) {
-      devices.value.push(DeviceInfo)
+  window.device.onDeviceUpdated((device) => {
+    const d = devices.value.find(d => d.ip === device.ip)
+    if (!d) {
+      devices.value.push(device)
+    } else {
+      Object.assign(d, device)
     }
   })
   window.device.onDeviceInitFailed((ip) => {
@@ -171,10 +150,10 @@ onMounted(() => {
   scan()
 })
 
-const ip = ref('192.168.1.0/24')
+// const ip = ref('192.168.1.0/24')
 // const ip = ref('172.30.0.0/24')
 // const ip = ref('172.30.0.186')
-// const ip = ref('192.168.1.64')
+const ip = ref('192.168.1.64')
 const loading = ref(false)
 const nmapScan = async () => {
   try {
@@ -217,6 +196,13 @@ const getDeviceInfo = async (ip) => {
   window.api.common.call(ip, 'systemDeviceInfo').then(res => {
     log.debug(ip, res)
   }).catch((err) => {
+    log.error(err)
+  })
+}
+const activate = async (ip) => {
+  window.api.common.call(ip, 'activate').then(res => {
+    log.info(res)
+  }).catch(err => {
     log.error(err)
   })
 }

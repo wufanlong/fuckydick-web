@@ -1,5 +1,4 @@
-const { contextBridge, ipcRenderer } = require('electron')
-
+import { contextBridge, ipcRenderer } from 'electron'
 contextBridge.exposeInMainWorld('system', {
   scan: {
     fast: (ip) => ipcRenderer.invoke('scan:fast', ip)

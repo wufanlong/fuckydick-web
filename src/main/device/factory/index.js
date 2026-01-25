@@ -7,12 +7,11 @@ const sdks = [];
 export function createDevice(ip) {
   const sdk = new isapiSDK(ip, "admin", "sszx123456");
   sdk.init();
-  sdk.on("deviceInitd", (DeviceInfo) => {
-    DeviceInfo.ip = ip;
+  sdk.on('deviceUpdated', (device) => {
     windowManager
       .getByName("mainWindow")
-      .webContents.send("deviceInitd", DeviceInfo);
-  });
+      .webContents.send("deviceUpdated", JSON.parse(JSON.stringify(device)));
+  })
   sdk.on("initFailed", (err) => {
     if (err.code !== "ETIMEDOUT") {
         log.error(`SDK init failed for IP ${ip}:`, err.message);

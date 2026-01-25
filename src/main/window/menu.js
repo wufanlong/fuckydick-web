@@ -1,4 +1,4 @@
-const { Menu, app, MenuItem } = require("electron");
+import { Menu, app, MenuItem } from 'electron'
 import windowManager from "./windowManager.js";
 
 let mainWindow;

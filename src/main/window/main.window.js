@@ -12,7 +12,7 @@ const createWindow = () => {
   window.maximize();
   window.show();
   // Open the DevTools.
-  window.webContents.openDevTools({ mode: 'detach' });
+  // window.webContents.openDevTools({ mode: 'detach' });
 };
 
 app.whenReady().then(() => {
