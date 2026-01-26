@@ -14,9 +14,12 @@ export function createDevice(ip) {
   })
   sdk.on("initFailed", (err) => {
     if (err.code !== "ETIMEDOUT") {
-        log.error(`SDK init failed for IP ${ip}:`, err.message);
-    }
-    // log.debug(`SDK init failed for IP ${ip}:`, err);
+        if (err.message !== "Socket timeout") {
+          log.error(`SDK init failed for IP ${ip}:`, err.message);
+        } else {
+          console.log(`SDK init failed for IP ${ip}:`, err.message)
+        }
+    } 
     windowManager
       .getByName("mainWindow")
       .webContents.send("deviceInitFailed", ip);

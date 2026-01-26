@@ -1,12 +1,12 @@
 <template>
   <div class="flex justify-between items-center">
-    <v-text-field class="w-[70%]" label="ip" v-model="ip"></v-text-field>
+    <v-text-field class="w-[50%]" label="ip" v-model="ip"></v-text-field>
     <v-btn variant="tonal" :loading="loading" @click="scan">发现设备</v-btn>
+    <v-text-field class="w-[50%]" label="搜索" v-model="search"></v-text-field>
     <!-- <v-btn variant="tonal" :loading="loading" @click="nmapScan">nmap发现设备</v-btn> -->
   </div>
-  <StreamPlayer ref="player" class="w-1/2 h-1/2"/>
-  <v-data-table-virtual multi-sort expand-on-click :loading="loading" hover striped="even" density="compact" height="480"
-    :headers="headers" :items="devices" :item-value="item => item.ip" fixed-header>
+  <v-data-table multi-sort expand-on-click :loading="loading" hover striped="even" density="compact" :search="search" :items-per-page="10000000"
+    height="480" :headers="headers" :items="devices" :item-value="item => item.ip" fixed-header>
     <template v-slot:loading>
       <v-skeleton-loader type="table-row@10"></v-skeleton-loader>
     </template>
@@ -25,8 +25,17 @@
           <v-btn size="x-small" variant="tonal" @click="activate(item.ip)">激活</v-btn>
         </td>
       </tr>
+      <tr class="h-[400px]">
+        <td :colspan="columns.length" class="py-2">
+          <StreamPlayer :ref="el => setPlayerRef(el, item.ip)" class="w-[600px] h-[400px]" />
+        </td>
+      </tr>
     </template>
-  </v-data-table-virtual>
+    <template v-slot:bottom>
+      <div class="text-center pt-2">
+      </div>
+    </template>
+  </v-data-table>
 </template>
 
 <script setup name="Home">
@@ -137,7 +146,15 @@ const headers = ref([
   },
 ])
 const devices = ref([])
-const player = ref(null)
+const search = ref('')
+const players = reactive({})
+const setPlayerRef = (el, ip) => {
+  if (el) {
+    players[ip] = el
+  } else {
+    delete players[ip]
+  }
+}
 onMounted(() => {
   window.device.onDeviceUpdated((device) => {
     const d = devices.value.find(d => d.ip === device.ip)
@@ -154,9 +171,9 @@ onMounted(() => {
 })
 
 // const ip = ref('192.168.1.0/24')
-// const ip = ref('172.30.0.0/24')
+const ip = ref('172.30.0.0/24')
 // const ip = ref('172.30.0.186')
-const ip = ref('192.168.1.64')
+// const ip = ref('192.168.1.64')
 const loading = ref(false)
 const nmapScan = async () => {
   try {
@@ -190,10 +207,10 @@ const scan = async () => {
 }
 
 const preview = async (ip) => {
-  player.value.start(ip)
+  players[ip].start(ip)
 }
 const stopPreview = (ip) => {
-  player.value.stop(ip)
+  players[ip].stop(ip)
 }
 const getSecurityCapabilities = async (ip) => {
   window.api.common.call(ip, 'securityCapabilities').then(res => {

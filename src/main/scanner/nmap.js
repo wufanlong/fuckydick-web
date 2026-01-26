@@ -18,7 +18,6 @@ export function NmapScan(ips) {
     });
 
     quickscan.on("error", function (error) {
-      console.log(error)
       reject(error);
     });
     quickscan.startScan();

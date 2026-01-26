@@ -46,7 +46,7 @@ const play = async (ip) => {
         answer.sdp = ret.sdp;
         answer.type = 'answer';
         pc.setRemoteDescription(answer).then(() => {
-          log.info('播放成功');
+          log.info(ip, '播放成功');
         }).catch(e => {
           log.error(e);
         });
@@ -76,7 +76,7 @@ const stop = () => {
     pc = null;
   }
   
-  console.log('已停止播放');
+  log.info(ip, '已停止播放');
 }
 defineExpose({
   start,
