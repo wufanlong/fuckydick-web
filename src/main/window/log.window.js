@@ -17,6 +17,9 @@ export const createWindow = () => {
   window.on('page-title-updated', (e) => {
     e.preventDefault();
   });
+  window.on('close', e => {
+    window.destroy()
+  })
 
-  // window.webContents.openDevTools({ mode: 'detach' });
+  window.webContents.openDevTools({ mode: 'detach' });
 };

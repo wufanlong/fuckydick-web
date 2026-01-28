@@ -27,7 +27,7 @@
       </tr>
       <tr class="h-[400px]">
         <td :colspan="columns.length" class="py-2">
-          <StreamPlayer :ref="el => setPlayerRef(el, item.ip)" class="w-[600px] h-[400px]" />
+          <StreamPlayer :ref="el => setPlayerRef(el, item.ip)" class="w-[640px] h-[360px]" />
         </td>
       </tr>
     </template>

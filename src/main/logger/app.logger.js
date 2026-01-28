@@ -26,7 +26,9 @@ app.whenReady().then(() => {
     const level = msg.level;
     msg = formatElectronLogMessage(msg);
     log.message += `<div class="log-line ${level} cursor-pointer hover:scale-101">${escapeHtml(msg)}</div>`
-    windowManager.getByName("mainWindow").webContents.send("log:loggingOnRenderer", log.message);
+    if (windowManager.isAlive("logWindow")) {
+      windowManager.getByName("logWindow").webContents.send("log:loggingOnRenderer", log.message);
+    }
   }
 
   log.transports.sendToRenderer.level = 'info'

@@ -38,4 +38,7 @@ export default {
       }
     }
   },
+  isAlive(name) {
+    return !map[name].isDestroyed()
+  }
 };
