@@ -1,5 +1,6 @@
 import { BrowserWindow } from "electron";
 import { createWindow as createConfigWindow } from "./config.window.js";
+import { createWindow as createLogWindow } from "./log.window.js";
 import path from "node:path";
 import { windowsGlobalOptions } from "../config/app.config.js";
 const map = {};
@@ -30,6 +31,9 @@ export default {
       switch (name) {
         case "configWindow":
           createConfigWindow();
+          break;
+        case "logWindow":
+          createLogWindow();
           break;
       }
     }

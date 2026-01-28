@@ -18,7 +18,7 @@ const pull = async (ip) => {
 }
 const play = async (ip) => {
   if (pc) {
-    stop()
+    stop(ip)
   }
   pc = new RTCPeerConnection({
     iceServers: [] // 可加 STUN/TURN
@@ -60,7 +60,7 @@ const start = async (ip) => {
   await pull(ip)
   play(ip)
 }
-const stop = () => {
+const stop = (ip) => {
   // 1. 停止所有 track
   if (videoEl.value?.srcObject) {
     videoEl.value.srcObject.getTracks().forEach(track => {

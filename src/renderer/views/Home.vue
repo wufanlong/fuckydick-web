@@ -1,12 +1,12 @@
 <template>
   <div class="flex justify-between items-center">
-    <v-text-field class="w-[50%]" label="ip" v-model="ip"></v-text-field>
+    <v-text-field class="w-[50%]" label="ip" v-model="ip" clearable></v-text-field>
     <v-btn variant="tonal" :loading="loading" @click="scan">发现设备</v-btn>
-    <v-text-field class="w-[50%]" label="搜索" v-model="search"></v-text-field>
+    <v-text-field class="w-[50%]" label="搜索" v-model="search" clearable></v-text-field>
     <!-- <v-btn variant="tonal" :loading="loading" @click="nmapScan">nmap发现设备</v-btn> -->
   </div>
-  <v-data-table multi-sort expand-on-click :loading="loading" hover striped="even" density="compact" :search="search" :items-per-page="10000000"
-    height="480" :headers="headers" :items="devices" :item-value="item => item.ip" fixed-header>
+  <v-data-table class="h-[89%]" multi-sort expand-on-click :loading="loading" hover striped="even" density="compact" :search="search" :items-per-page="10000000"
+     :headers="headers" :items="devices" :item-value="item => item.ip" fixed-header>
     <template v-slot:loading>
       <v-skeleton-loader type="table-row@10"></v-skeleton-loader>
     </template>
@@ -16,7 +16,7 @@
         variant="text" width="105" border slim @click="toggleExpand(internalItem)"></v-btn>
     </template>
     <template v-slot:expanded-row="{ columns, item }">
-      <tr>
+      <tr class="text-center">
         <td :colspan="columns.length" class="py-2">
           <v-btn size="x-small" variant="tonal" @click="preview(item.ip)">预览</v-btn>
           <v-btn size="x-small" variant="tonal" @click="stopPreview(item.ip)">停止预览</v-btn>
@@ -40,7 +40,7 @@
 
 <script setup name="Home">
 import log from 'electron-log/renderer'
-import StreamPlayer from '../components/stream/StreamPlayer.vue'
+import StreamPlayer from '../components/StreamPlayer.vue'
 const headers = ref([
   {
     title: '状态',
@@ -171,6 +171,7 @@ onMounted(() => {
 })
 
 // const ip = ref('192.168.1.0/24')
+// const ip = ref('172.30.179.0/24')
 const ip = ref('172.30.0.0/24')
 // const ip = ref('172.30.0.186')
 // const ip = ref('192.168.1.64')

@@ -1,10 +1,9 @@
 import { app, BrowserWindow } from 'electron';
 import path from 'path';
 import { exec, spawn } from 'child_process';
-import log from '../logger/app.logger.js'
+import log from 'electron-log/main';
 
 let zlmProcess = null
-
 
 function isNpcapIstalled() {
     return new Promise((resolve, reject) => {

@@ -7,8 +7,12 @@ import windowManager from '../window/windowManager.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// export default message = '';
+
 app.whenReady().then(() => {
   log.initialize();
+  log.message = ''
   const logDir = path.join(__dirname, '../logs');
 
   if (!fs.existsSync(logDir)) {
@@ -18,9 +22,11 @@ app.whenReady().then(() => {
   log.transports.file.resolvePathFn = () =>
     path.join(logDir, 'app.log');
 
-  log.transports.sendToRenderer = (message) => {
-    message = formatElectronLogMessage(message);
-    windowManager.getByName("mainWindow").webContents.send("log:loggingOnRenderer", message);
+  log.transports.sendToRenderer = (msg) => {
+    const level = msg.level;
+    msg = formatElectronLogMessage(msg);
+    log.message += `<div class="log-line ${level} cursor-pointer hover:scale-101">${escapeHtml(msg)}</div>`
+    windowManager.getByName("mainWindow").webContents.send("log:loggingOnRenderer", log.message);
   }
 
   log.transports.sendToRenderer.level = 'info'
@@ -29,6 +35,13 @@ app.whenReady().then(() => {
 
   log.info('Electron logger initialized');
 });
+
+function escapeHtml(str) {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+}
 
 function formatElectronLogMessage(msg) {
   // 1. 时间格式化 yyyy-MM-dd HH:mm:ss.SSS
@@ -62,7 +75,8 @@ function formatElectronLogMessage(msg) {
     .join(' ');
 
   // 4. 最终格式
+  if (['error', 'debug'].includes(level)) {
+    return `[${time}] [${level}] ${content}`;
+  }
   return `[${time}] [${level}]  ${content}`;
 }
-
-export default log;

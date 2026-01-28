@@ -2,14 +2,14 @@ import windowManager from "./windowManager.js";
 
 export const createWindow = () => {
   let options = {
-    name: "configWindow",
-    width: 800,
+    name: "logWindow",
+    width: 900,
     height: 500,
-    title: "全局配置",
+    title: "日志",
     fullscreen: false,
-    hash: 'config',
+    hash: 'log',
     parent: windowManager.getByName("mainWindow"),
-    modal: true,
+    modal: false,
   };
   const window = windowManager.createWindow(options);  
   window.removeMenu();

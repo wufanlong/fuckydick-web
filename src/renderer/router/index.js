@@ -21,6 +21,11 @@ const routes = [
         name: 'Config',
         component: () => import('../views/config/Config.vue')
       },
+      {
+        path: '/log',
+        name: 'Log',
+        component: () => import('../views/log/Log.vue')
+      },
     ]
   },
 ]

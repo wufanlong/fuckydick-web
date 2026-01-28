@@ -14,6 +14,7 @@ contextBridge.exposeInMainWorld('system', {
     setConsoleLogLevel: (level) => ipcRenderer.invoke('log:setConsoleLogLevel', level),
     loggingOnRenderer: (callback) => ipcRenderer.on('log:loggingOnRenderer', (_event, message) => {
       callback(message);
-    })
+    }),
+    getLog: () => ipcRenderer.invoke("log:getLog")
   }
 })

@@ -29,6 +29,14 @@ const menuConfigList = [
       configWindow.focus();
     },
   },
+  {
+    label: "日志",
+    click: () => {
+      const logWindow = windowManager.getByName("logWindow");
+      logWindow.show();
+      logWindow.focus();
+    },
+  },
 ];
 
 app.whenReady().then(() => {
