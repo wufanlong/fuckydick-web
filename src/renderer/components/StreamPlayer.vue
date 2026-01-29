@@ -1,5 +1,5 @@
 <template>
-  <video ref="videoEl" autoplay playsinline controls></video>
+  <video ref="videoEl" autoplay playsinline controls @dblclick.prevent></video>
 </template>
 
 <script setup name="StreamPlayer">
@@ -10,27 +10,24 @@ const videoEl = ref(null)
 const props = defineProps({
 })
 const app = 'live'  // ZLM 默认应用名
-let pc;
+const pc = ref(null)
 const pull = async (ip) => {
   const url = `rtsp://admin:sszx123456@${ip}:554/Streaming/Channels/101`
   const response = await fetch(`http://127.0.0.1/index/api/addStreamProxy?app=${app}&stream=${ip}&type=play&secret=aev5nuiInWrzIEKJMJc5suXzE6nhIdgI&vhost=__defaultVhost__&url=${url}`)
   return response
 }
 const play = async (ip) => {
-  if (pc) {
-    stop(ip)
-  }
-  pc = new RTCPeerConnection({
+  pc.value = new RTCPeerConnection({
     iceServers: [] // 可加 STUN/TURN
   })
 
-  pc.ontrack = (event) => {
+  pc.value.ontrack = (event) => {
     videoEl.value.srcObject = event.streams[0]
   }
-  pc.addTransceiver('video', { direction: 'recvonly' })
-  pc.addTransceiver('audio', { direction: 'recvonly' })
-  pc.createOffer().then((desc) => {
-    pc.setLocalDescription(desc).then(() => {
+  pc.value.addTransceiver('video', { direction: 'recvonly' })
+  pc.value.addTransceiver('audio', { direction: 'recvonly' })
+  pc.value.createOffer().then((desc) => {
+    pc.value.setLocalDescription(desc).then(() => {
       fetch(`http://127.0.0.1/index/api/webrtc?app=${app}&stream=${ip}&type=play`, {
         method: 'POST',
         headers: {
@@ -45,7 +42,7 @@ const play = async (ip) => {
         let answer = {};
         answer.sdp = ret.sdp;
         answer.type = 'answer';
-        pc.setRemoteDescription(answer).then(() => {
+        pc.value.setRemoteDescription(answer).then(() => {
           log.info(ip, '播放成功');
         }).catch(e => {
           log.error(e);
@@ -57,6 +54,9 @@ const play = async (ip) => {
   });
 }
 const start = async (ip) => {
+  if (pc.value) {
+    stop(ip)
+  }
   await pull(ip)
   play(ip)
 }
@@ -70,10 +70,10 @@ const stop = (ip) => {
   }
   
   // 2. 关闭 PeerConnection
-  if (pc) {
-    pc.ontrack = null;
-    pc.close();
-    pc = null;
+  if (pc.value) {
+    pc.value.ontrack = null;
+    pc.value.close();
+    pc.value = null;
   }
   
   log.info(ip, '已停止播放');

@@ -21,5 +21,5 @@ export const createWindow = () => {
     window.destroy()
   })
 
-  window.webContents.openDevTools({ mode: 'detach' });
+  // window.webContents.openDevTools({ mode: 'detach' });
 };

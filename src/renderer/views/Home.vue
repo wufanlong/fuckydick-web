@@ -172,8 +172,8 @@ onMounted(() => {
 
 // const ip = ref('192.168.1.0/24')
 // const ip = ref('172.30.179.0/24')
-const ip = ref('172.30.0.0/24')
-// const ip = ref('172.30.0.186')
+// const ip = ref('172.30.0.0/24')
+const ip = ref('172.30.0.245')
 // const ip = ref('192.168.1.64')
 const loading = ref(false)
 const nmapScan = async () => {

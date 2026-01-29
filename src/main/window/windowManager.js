@@ -39,6 +39,6 @@ export default {
     }
   },
   isAlive(name) {
-    return !map[name].isDestroyed()
+    return map[name] ? !map[name].isDestroyed() : false
   }
 };

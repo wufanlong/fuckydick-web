@@ -14,10 +14,10 @@ export function createDevice(ip) {
   })
   sdk.on("initFailed", (err) => {
     if (err.code !== "ETIMEDOUT") {
-        if (err.message !== "Socket timeout") {
+        if (err.message !== "Socket timeout" && !err.error?.includes("connect ECONNREFUSED")) {
           log.error(`SDK init failed for IP ${ip}:`, err.message);
         } else {
-          console.log(`SDK init failed for IP ${ip}:`, err.message)
+          console.log(`SDK init failed for IP ${ip}:`, err.message || err.error)
         }
     } 
     windowManager
