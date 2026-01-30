@@ -2,7 +2,7 @@
   <video ref="videoEl" autoplay playsinline controls @dblclick.prevent></video>
 </template>
 
-<script setup name="StreamPlayer">
+<script setup lang="ts" name="StreamPlayer">
 import { ref, onMounted } from 'vue'
 import log from 'electron-log/renderer'
 

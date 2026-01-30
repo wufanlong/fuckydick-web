@@ -38,7 +38,7 @@
   </v-data-table>
 </template>
 
-<script setup name="Home">
+<script setup lang="ts" name="Home">
 import log from 'electron-log/renderer'
 import StreamPlayer from '../components/StreamPlayer.vue'
 const headers = ref([

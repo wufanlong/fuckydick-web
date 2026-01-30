@@ -2,6 +2,6 @@
   <router-view></router-view>
 </template>
 
-<script setup name="Layout">
+<script setup lang="ts" name="Layout">
 
 </script>

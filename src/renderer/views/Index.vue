@@ -5,7 +5,7 @@
   </div>
 </template>
 
-<script setup name="Index">
+<script setup lang="ts" name="Index">
 import { useRouter } from 'vue-router'
 import log from 'electron-log/renderer'
 

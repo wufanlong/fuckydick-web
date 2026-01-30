@@ -9,6 +9,6 @@
         <v-text-field class="w-[25%] mx-2" label="NTP端口"></v-text-field>
     </v-form>
 </template>
-<script setup name="Config">
+<script setup lang="ts" name="Config">
 
 </script>

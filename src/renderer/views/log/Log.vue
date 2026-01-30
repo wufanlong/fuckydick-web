@@ -2,7 +2,7 @@
     <div ref="logRef" class="log-container pl-4 overflow-y-auto !mr-[-5px] overflow-x-hidden h-full" v-html="logContent">
     </div>
 </template>
-<script setup name="Log">
+<script setup lang="ts" name="Log">
 const logContent = ref('')
 window.system.log.loggingOnRenderer((message) => {
     logContent.value = message;
