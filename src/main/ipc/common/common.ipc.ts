@@ -12,5 +12,7 @@ ipcMain.handle("common:call", (_event, ip, fName) => {
         return sdk.core.system.getSystemNetworkInterfaces()
     } else if (fName === 'activate') {
         return sdk.core.system.activate()
+    } else if (fName === 'reboot') {
+        return sdk.core.system.reboot()
     }
 });

@@ -9,3 +9,7 @@ ipcMain.handle("device:updateIsapiSDKInstance", (_event, ips) => {
   sdks.length = 0;
   sdks.push(...batchCreateDevices(ips));
 });
+ipcMain.handle("device:site", (_event, ip) => {
+  
+});
+

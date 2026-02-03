@@ -20,9 +20,11 @@
         <td :colspan="columns.length" class="py-2">
           <v-btn size="x-small" variant="tonal" @click="preview(item.ip)">预览</v-btn>
           <v-btn size="x-small" variant="tonal" @click="stopPreview(item.ip)">停止预览</v-btn>
+          <v-btn size="x-small" variant="tonal" @click="openSite(item.ip)">打开网页</v-btn>
           <v-btn size="x-small" variant="tonal" @click="getDeviceInfo(item.ip)">获取设备信息</v-btn>
           <v-btn size="x-small" variant="tonal" @click="getSecurityCapabilities(item.ip)">获取加密能力</v-btn>
           <v-btn size="x-small" variant="tonal" @click="activate(item.ip)">激活</v-btn>
+          <v-btn size="x-small" variant="tonal" @click="reboot(item.ip)">重启</v-btn>
         </td>
       </tr>
       <tr class="h-[400px]">
@@ -172,8 +174,9 @@ onMounted(() => {
 
 // const ip = ref('192.168.1.0/24')
 // const ip = ref('172.30.179.0/24')
-// const ip = ref('172.30.0.0/24')
-const ip = ref('172.30.0.245')
+const ip = ref('172.30.0.0/24')
+// const ip = ref('172.30.8.0/24')
+// const ip = ref('172.30.0.245')
 // const ip = ref('192.168.1.64')
 const loading = ref(false)
 const nmapScan = async () => {
@@ -229,6 +232,20 @@ const getDeviceInfo = async (ip) => {
 }
 const activate = async (ip) => {
   window.api.common.call(ip, 'activate').then(res => {
+    log.debug(res)
+  }).catch(err => {
+    log.error(err)
+  })
+}
+const reboot = async (ip) => {
+  window.api.common.call(ip, 'reboot').then(res => {
+    log.debug(res)
+  }).catch(err => {
+    log.error(err)
+  })
+}
+const openSite = async (ip) => {
+  window.device.openSite(ip).then(res => {
     log.debug(res)
   }).catch(err => {
     log.error(err)
