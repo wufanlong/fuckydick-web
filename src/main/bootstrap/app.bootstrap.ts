@@ -1,11 +1,11 @@
 import { app, BrowserWindow } from 'electron';
 import path from 'path';
-import { exec, spawn } from 'child_process';
+import { ChildProcessWithoutNullStreams, exec, spawn } from 'child_process';
 import log from 'electron-log/main';
 
-let zlmProcess = null
+let zlmProcess: ChildProcessWithoutNullStreams | null;
 
-function isNpcapIstalled() {
+function isNpcapInstalled() {
     return new Promise((resolve, reject) => {
         // 注册表中查找是否有相应的值
         exec('reg query "HKLM\\SOFTWARE\\WOW6432Node\\Npcap"', (err, stdout) => {
@@ -19,7 +19,7 @@ function isNpcapIstalled() {
                 } else {
                     log.error("未知错误code=" + err.code)
                 }
-                reject(err)
+                reject(false)
             } else {
                 resolve(true)
             }
@@ -45,7 +45,7 @@ function runNpcapInstaller() {
             }
         })
     }
-    isNpcapIstalled().then(response => {
+    isNpcapInstalled().then(response => {
         if (!response) {
             log.info("开始执行Npcap安装程序")
             install()
@@ -86,10 +86,13 @@ function runZLMediaKit() {
   })
 }
 
-export function isEnvsReady() {
-    log.info("Environment ready status check initiated")
+export async function isEnvsReady() {
+    log.info("Environment ready status check")
     const isZlmExist = zlmProcess ? true : false
-    return isNpcapIstalled() && isZlmExist
+    const isNpcapExist = await isNpcapInstalled()
+    log.info("Npcap", isNpcapExist)
+    log.info("zlm", isZlmExist)
+    return isNpcapExist && isZlmExist
 }
 
 app.whenReady().then(() => {

@@ -1,4 +1,5 @@
 import path from "node:path";
+import { nativeTheme, app } from 'electron'
 
 export const windowsGlobalOptions: Electron.BrowserWindowConstructorOptions = {
   webPreferences: {
@@ -8,3 +9,7 @@ export const windowsGlobalOptions: Electron.BrowserWindowConstructorOptions = {
   icon: path.join(__dirname, "../../../public/icon.ico"),
   backgroundColor: "#EDEDED", // ⭐ 关键配置：窗口背景色
 };
+
+app.whenReady().then(() => {
+  nativeTheme.themeSource = 'light';
+});
