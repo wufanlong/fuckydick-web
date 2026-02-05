@@ -1,25 +1,33 @@
-import { BrowserWindow } from "electron";
+import { app, BrowserWindow } from "electron";
+import { createWindow as createMainWindow } from "./main.window.ts";
 import { createWindow as createConfigWindow } from "./config.window.ts";
 import { createWindow as createLogWindow } from "./log.window.ts";
-import path from "node:path";
+import { createWindow as createSiteWindow } from "./site.window.ts";
+import log from 'electron-log'
 import { windowsGlobalOptions } from "../config/app.config.ts";
-const map = {};
+
+const map: Record<string, BrowserWindow> = {};
+
+app.whenReady().then(() => {
+  createMainWindow();
+  app.on("activate", () => {
+    if (BrowserWindow.getAllWindows().length === 0) {
+      createMainWindow();
+    }
+  });
+});
 
 export default {
-  createWindow(options) {
+  /**
+   * 
+   * @param options 
+   * @returns 
+   */
+  createWindow(options: Electron.BrowserWindowConstructorOptions, name: string): BrowserWindow {
     // 引入全局配置
     Object.assign(options, windowsGlobalOptions);
     let window = new BrowserWindow(options);
-    options.hash = options.hash || "";
-    if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
-      window.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL + "/#" + options.hash);
-    } else {
-      window.loadFile(
-        path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`),
-        { hash: options.hash }
-      );
-    }
-    map[options.name] = window;
+    map[name] = window;
     return window;
   },
   getByName(name: string) {
@@ -35,6 +43,8 @@ export default {
         case "logWindow":
           createLogWindow();
           break;
+        default :
+          createSiteWindow(name);
       }
     }
   },

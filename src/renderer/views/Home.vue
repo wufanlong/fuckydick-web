@@ -245,11 +245,7 @@ const reboot = async (ip) => {
   })
 }
 const openSite = async (ip) => {
-  window.device.openSite(ip).then(res => {
-    log.debug(res)
-  }).catch(err => {
-    log.error(err)
-  })
+  window.device.openSite(ip)
 }
 </script>
 <style scoped></style>

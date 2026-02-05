@@ -1,5 +1,5 @@
 <template>
-  <video ref="videoEl" autoplay playsinline controls @dblclick.prevent></video>
+  <video ref="videoEl" autoplay playsinline controls></video>
 </template>
 
 <script setup lang="ts" name="StreamPlayer">
