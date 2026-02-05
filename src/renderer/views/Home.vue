@@ -5,8 +5,9 @@
     <v-text-field class="w-[50%]" label="搜索" v-model="search" clearable></v-text-field>
     <!-- <v-btn variant="tonal" :loading="loading" @click="nmapScan">nmap发现设备</v-btn> -->
   </div>
-  <v-data-table class="h-[89%]" multi-sort expand-on-click :loading="loading" hover striped="even" density="compact" :search="search" :items-per-page="10000000"
-     :headers="headers" :items="devices" :item-value="item => item.ip" fixed-header>
+  <v-data-table class="h-[89%]" multi-sort expand-on-click :loading="loading" hover striped="even" density="compact" :items-length="devices.length"
+    :search="search" items-per-page="50" :headers="headers" :items="devices" :item-value="item => item.ip" v-model:page="pagination.pageNum"
+    :item-key="item => item.ip" fixed-header items-per-page-text="" show-current-page prev-page-label="dick">
     <template v-slot:loading>
       <v-skeleton-loader type="table-row@10"></v-skeleton-loader>
     </template>
@@ -33,9 +34,8 @@
         </td>
       </tr>
     </template>
-    <template v-slot:bottom>
-      <div class="text-center pt-2">
-      </div>
+    <template v-slot:bottom="{ pageCount }">
+      <v-pagination v-model="pagination.pageNum" :length="pageCount" size="x-small" />
     </template>
   </v-data-table>
 </template>
@@ -149,6 +149,9 @@ const headers = ref([
 ])
 const devices = ref([])
 const search = ref('')
+const pagination = reactive({
+  pageNum: 1,
+})
 const players = reactive({})
 const setPlayerRef = (el, ip) => {
   if (el) {
