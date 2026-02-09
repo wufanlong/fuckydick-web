@@ -6,8 +6,9 @@
     <!-- <v-btn variant="tonal" :loading="loading" @click="nmapScan">nmap发现设备</v-btn> -->
   </div>
   <v-data-table class="h-[89%]" multi-sort expand-on-click :loading="loading" hover striped="even" density="compact"
-    :search="search" items-per-page="50" :headers="headers" :items="devices" :item-value="item => item.ip" v-model:page="pagination.pageNum"
-    :item-key="item => item.ip" fixed-header items-per-page-text="" show-current-page prev-page-label="dick">
+    :search="search" items-per-page="50" :headers="headers" :items="devices" :item-value="item => item.ip"
+    v-model:page="pagination.pageNum" :item-key="item => item.ip" fixed-header items-per-page-text="" show-current-page
+    prev-page-label="dick">
     <template v-slot:loading>
       <v-skeleton-loader type="table-row@10"></v-skeleton-loader>
     </template>
@@ -23,6 +24,25 @@
           <v-btn size="x-small" variant="tonal" @click="stopPreview(item.ip)">停止预览</v-btn>
           <v-btn size="x-small" variant="tonal" @click="openSite(item.ip)">打开网页</v-btn>
           <v-btn size="x-small" variant="tonal" @click="getDeviceInfo(item.ip)">获取设备信息</v-btn>
+          <v-dialog max-width="500">
+            <template v-slot:activator="{ props: activatorProps }">
+              <v-btn v-bind="activatorProps" size="x-small" variant="tonal" @click="text=JSON.stringify(item.DeviceInfo, null, 2)">修改设备信息</v-btn>
+            </template>
+
+            <template v-slot:default="{ isActive }">
+              <v-card title="修改设备信息">
+                <v-card-text>
+                  <v-textarea rows="15" auto-grow v-model="text"></v-textarea>
+                </v-card-text>
+
+                <v-card-actions>
+                  <v-spacer></v-spacer>
+                  <v-btn text="取消" @click="isActive.value = false"></v-btn>
+                  <v-btn text="确定" @click="putDeviceInfo(item.ip);isActive.value = false"></v-btn>
+                </v-card-actions>
+              </v-card>
+            </template>
+          </v-dialog>
           <v-btn size="x-small" variant="tonal" @click="getSecurityCapabilities(item.ip)">获取加密能力</v-btn>
           <v-btn size="x-small" variant="tonal" @click="activate(item.ip)">激活</v-btn>
           <v-btn size="x-small" variant="tonal" @click="reboot(item.ip)">重启</v-btn>
@@ -47,6 +67,7 @@
 <script setup lang="ts" name="Home">
 import log from 'electron-log/renderer'
 import StreamPlayer from '../components/StreamPlayer.vue'
+import { de } from 'element-plus/es/locale'
 const headers = ref([
   {
     title: '状态',
@@ -151,6 +172,7 @@ const headers = ref([
     nowrap: true,
   },
 ])
+const text = ref('')
 const devices = ref([])
 const search = ref('')
 const pagination = reactive({
@@ -232,6 +254,13 @@ const getSecurityCapabilities = async (ip) => {
 }
 const getDeviceInfo = async (ip) => {
   window.api.common.call(ip, 'systemDeviceInfo').then(res => {
+    log.debug(ip, res)
+  }).catch((err) => {
+    log.error(err)
+  })
+}
+const putDeviceInfo = async (ip) => {
+  window.api.common.call(ip, 'putDeviceInfo', JSON.parse(text.value)).then(res => {
     log.debug(ip, res)
   }).catch((err) => {
     log.error(err)
