@@ -58,7 +58,7 @@ export const createWindow = (ip: string) => {
     }
   });
 
-  window.webContents.openDevTools({ mode: "detach" });
+  // window.webContents.openDevTools({ mode: "detach" });
 };
 
 function getScript(location: string): string {

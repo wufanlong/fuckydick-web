@@ -5,7 +5,7 @@
     <v-text-field class="w-[50%]" label="搜索" v-model="search" clearable></v-text-field>
     <!-- <v-btn variant="tonal" :loading="loading" @click="nmapScan">nmap发现设备</v-btn> -->
   </div>
-  <v-data-table class="h-[89%]" multi-sort expand-on-click :loading="loading" hover striped="even" density="compact" :items-length="devices.length"
+  <v-data-table class="h-[89%]" multi-sort expand-on-click :loading="loading" hover striped="even" density="compact"
     :search="search" items-per-page="50" :headers="headers" :items="devices" :item-value="item => item.ip" v-model:page="pagination.pageNum"
     :item-key="item => item.ip" fixed-header items-per-page-text="" show-current-page prev-page-label="dick">
     <template v-slot:loading>
@@ -35,7 +35,11 @@
       </tr>
     </template>
     <template v-slot:bottom="{ pageCount }">
-      <v-pagination v-model="pagination.pageNum" :length="pageCount" size="x-small" />
+      <div class="flex items-center justify-between">
+        <div class="w-1/10 !px-4">共 {{ devices.length }} 个设备</div>
+        <v-pagination class="w-8/10" v-model="pagination.pageNum" :length="pageCount" size="x-small" />
+        <div class="w-1/10"></div>
+      </div>
     </template>
   </v-data-table>
 </template>
@@ -177,10 +181,10 @@ onMounted(() => {
 
 // const ip = ref('192.168.1.0/24')
 // const ip = ref('172.30.179.0/24')
-const ip = ref('172.30.0.0/24')
+// const ip = ref('172.30.0.0/24')
 // const ip = ref('172.30.8.0/24')
 // const ip = ref('172.30.0.245')
-// const ip = ref('192.168.1.64')
+const ip = ref('192.168.1.64')
 const loading = ref(false)
 const nmapScan = async () => {
   try {
