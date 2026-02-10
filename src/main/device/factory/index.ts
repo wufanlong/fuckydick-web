@@ -6,7 +6,10 @@ const sdks: Array<isapiSDK> = [];
 
 export function createDevice(ip: string) {
   const sdk = new isapiSDK(ip, "admin", "sszx123456");
-  sdk.init();
+  try {
+    sdk.init();
+  } catch (err) {
+  }
   sdk.on('deviceUpdated', (device) => {
     windowManager
       .getByName("mainWindow")
@@ -15,14 +18,14 @@ export function createDevice(ip: string) {
   sdk.on("initFailed", (err) => {
     if (err.code !== "ETIMEDOUT") {
         if (err.message !== "Socket timeout" && !err.error?.includes("connect ECONNREFUSED")) {
-          log.error(`SDK init failed for IP ${ip}:`, err.message);
+          log.error(`SDK init failed for IP ${sdk.ip}:`, err.message);
         } else {
-          console.log(`SDK init failed for IP ${ip}:`, err.message || err.error)
+          console.log(`SDK init failed for IP ${sdk.ip}:`, err.message || err.error)
         }
     } 
     windowManager
       .getByName("mainWindow")
-      .webContents.send("deviceInitFailed", ip);
+      .webContents.send("deviceInitFailed", sdk.ip);
   });
   sdk.on("log:debug", (message) => {
     log.debug(message);
@@ -46,6 +49,11 @@ export function batchCreateDevices(ips: Array<string> | string) {
   return sdks;
 }
 
-export function getSDKByIP(ip: string) {
-  return sdks.find((sdk) => sdk.ip === ip);
+export function getSDKByIP(ip: string): isapiSDK {
+  const sdk = sdks.find((sdk) => sdk.ip === ip);
+  if (!sdk) {
+    log.error(`SDK not found for IP ${ip}`);
+    throw new Error(`SDK not found for IP ${ip}`);
+  }
+  return sdk;
 }
