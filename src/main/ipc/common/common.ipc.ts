@@ -16,5 +16,9 @@ ipcMain.handle("common:call", (_event, ip, fName, data) => {
         return sdk.core.system.activate()
     } else if (fName === 'reboot') {
         return sdk.core.system.reboot()
+    } else if (fName === 'basicRestore') {
+        return sdk.core.system.basicRestore()
+    } else if (fName === 'fullRestore') {
+        return sdk.core.system.fullRestore()
     }
 });

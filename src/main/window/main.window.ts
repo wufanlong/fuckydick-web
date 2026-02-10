@@ -60,7 +60,7 @@ export const createWindow = () => {
   setAppMenu()
   window.show();
   // Open the DevTools.
-  window.webContents.openDevTools({ mode: 'detach' });
+  // window.webContents.openDevTools({ mode: 'detach' });
 };
 
 function setAppMenu() {

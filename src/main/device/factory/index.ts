@@ -24,6 +24,18 @@ export function createDevice(ip: string) {
       .getByName("mainWindow")
       .webContents.send("deviceInitFailed", ip);
   });
+  sdk.on("log:debug", (message) => {
+    log.debug(message);
+  });
+  sdk.on("log:info", (message) => {
+    log.info(message);
+  });
+  sdk.on("log:warn", (message) => {
+    log.warn(message);
+  });
+  sdk.on("log:error", (message) => {
+    log.error(message);
+  });
   return sdk;
 }
 export function batchCreateDevices(ips: Array<string> | string) {
