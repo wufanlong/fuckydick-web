@@ -2,6 +2,7 @@
   <div class="flex justify-between items-center">
     <v-text-field class="w-[50%]" label="ip" v-model="ip" clearable></v-text-field>
     <v-btn variant="tonal" :loading="loading" @click="scan">发现设备</v-btn>
+    <v-btn variant="tonal" :loading="loading" @click="scanAll">扫描双十</v-btn>
     <v-text-field class="w-[50%]" label="搜索" v-model="search" clearable></v-text-field>
     <!-- <v-btn variant="tonal" :loading="loading" @click="nmapScan">nmap发现设备</v-btn> -->
   </div>
@@ -229,15 +230,23 @@ onMounted(() => {
   window.device.onDeviceInitFailed((ip) => {
     devices.value = devices.value.filter(d => d.ip !== ip)
   })
-  scan()
+  // scan()
 })
 
 // const ip = ref('192.168.1.0/24')
 // const ip = ref('172.30.179.0/24')
-// const ip = ref('172.30.0.0/24')
-// const ip = ref('172.30.8.0/24')
+const ip = ref('172.30.0.0/24')
+// <!-- const ip = ref('172.30.8.0/24') -->
 // const ip = ref('172.30.0.245')
-const ip = ref('192.168.1.64')
+// const ip = ref('192.168.1.64')
+const ips = ref([
+  '172.30.0.0/24',
+  '172.30.1.0/24',
+  '172.30.42.0/24',
+  '172.30.24.0/24',
+  '172.30.52.0/24',
+  '172.30.90.0/24',
+])
 const loading = ref(false)
 const nmapScan = async () => {
   try {
@@ -252,6 +261,18 @@ const nmapScan = async () => {
     devices.value.push(...result)
     loading.value = false
     window.device.updateIsapiSDKInstance(devices.value.map(d => d.ip))
+  } catch (err) {
+    log.error('扫描设备失败', err)
+    loading.value = false
+  }
+}
+const scanAll = async () => {
+  try {
+    devices.value.length = 0
+    loading.value = true
+    log.info('开始扫描设备：', ips.value)
+    await window.system.scan.scanAll([...ips.value])
+    loading.value = false
   } catch (err) {
     log.error('扫描设备失败', err)
     loading.value = false

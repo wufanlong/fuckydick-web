@@ -1,11 +1,16 @@
 import log from "electron-log/main";
 import { isapiSDK } from "isapi-js-sdk";
 import windowManager from "../../window/windowManager.ts";
+import net from "net";
 
 const sdks: Array<isapiSDK> = [];
 
 export function createDevice(ip: string) {
-  const sdk = new isapiSDK(ip, "admin", "sszx123456");
+  let password = "sszx123456";
+  if (ip.startsWith("172.30.24.")) {
+    password = "abc123456";
+  }
+  const sdk = new isapiSDK(ip, "admin", password);
   try {
     sdk.init();
   } catch (err) {
@@ -41,12 +46,40 @@ export function createDevice(ip: string) {
   });
   return sdk;
 }
-export function batchCreateDevices(ips: Array<string> | string) {
-  sdks.length = 0;
-  for (let i = 0; i < ips.length; i++) {
-    sdks.push(createDevice(ips[i]));
+// export function batchCreateDevices(ips: Array<string> | string) {
+//   sdks.length = 0;
+//   for (let i = 0; i < ips.length; i++) {
+//     sdks.push(createDevice(ips[i]));
+//   }
+//   return sdks;
+// }
+
+export async function batchCreateDevices(ips: string[]) {
+  sdks.length = 0
+
+  const concurrency = 40
+  let index = 0
+
+  async function worker() {
+    while (index < ips.length) {
+      const ip = ips[index++]
+      const open = await checkPort(ip, 80)
+
+      if (open) {
+        sdks.push(createDevice(ip))
+      }
+      await new Promise(r => setTimeout(r, 50))
+    }
   }
-  return sdks;
+
+  const workers = []
+  for (let i = 0; i < concurrency; i++) {
+    workers.push(worker())
+  }
+
+  await Promise.all(workers)
+
+  return sdks
 }
 
 export function getSDKByIP(ip: string): isapiSDK {
@@ -56,4 +89,29 @@ export function getSDKByIP(ip: string): isapiSDK {
     throw new Error(`SDK not found for IP ${ip}`);
   }
   return sdk;
+}
+
+
+function checkPort(ip: string, port = 80, timeout = 800): Promise<boolean> {
+  return new Promise((resolve) => {
+    const socket = new net.Socket();
+
+    socket.setTimeout(timeout);
+
+    socket.once("connect", () => {
+      socket.destroy();
+      resolve(true);
+    });
+
+    socket.once("timeout", () => {
+      socket.destroy();
+      resolve(false);
+    });
+
+    socket.once("error", () => {
+      resolve(false);
+    });
+
+    socket.connect(port, ip);
+  });
 }

@@ -1,7 +1,8 @@
 import { contextBridge, ipcRenderer } from 'electron'
 contextBridge.exposeInMainWorld('system', {
   scan: {
-    fast: (ip) => ipcRenderer.invoke('scan:fast', ip)
+    fast: (ip) => ipcRenderer.invoke('scan:fast', ip),
+    scanAll: (ips) => ipcRenderer.invoke('scan:scanAll', ips)
   },
   nmapScan: {
     fast: (ip) => ipcRenderer.invoke('nmapScan:fast', ip)
