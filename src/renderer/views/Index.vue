@@ -1,6 +1,6 @@
 <template>
   <div>
-    <span class="mr-4">Npcap is installing</span>
+    <span class="mr-4">Environment ready status:</span>
     <v-progress-circular indeterminate></v-progress-circular>
   </div>
 </template>
@@ -10,6 +10,8 @@ import { useRouter } from 'vue-router'
 import log from 'electron-log/renderer'
 
 const router = useRouter();
+router.replace({ name: 'Home' })
+
 const checkEnvs = async () => {
   const isReady = await window.system.bootstrap.isEnvsReady();
   log.info('Environment ready status:', isReady);
@@ -21,6 +23,6 @@ const checkEnvs = async () => {
     }, 5000);
   }
 }
-checkEnvs();
+// checkEnvs();
 </script>
 <style scoped></style>

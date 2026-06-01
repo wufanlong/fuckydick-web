@@ -6,31 +6,6 @@ let window: BrowserWindow;
 
 const menuConfigList = [
   {
-    label: "摄像头",
-    submenu: [
-      {
-        label: "扫描设备",
-        click: () => {
-          window.webContents.send("camera:scan");
-        },
-      },
-      {
-        label: "刷新流",
-        click: () => {
-          window.webContents.send("camera:refresh");
-        },
-      },
-    ],
-  },
-  {
-    label: "全局配置",
-    click: () => {
-      const configWindow = windowManager.getByName("configWindow");
-      configWindow.show();
-      configWindow.focus();
-    },
-  },
-  {
     label: "日志",
     click: () => {
       const logWindow = windowManager.getByName("logWindow");

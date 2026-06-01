@@ -10,6 +10,10 @@ contextBridge.exposeInMainWorld('system', {
   bootstrap: {
     isEnvsReady: () => ipcRenderer.invoke('bootstrap:isEnvsReady')
   },
+  config: {
+    writeRecorderConfig: (config) => ipcRenderer.invoke('config:writeRecorderConfig', config),
+    readRecorderConfig: () => ipcRenderer.invoke('config:readRecorderConfig')
+  },
   log: {
     setFileLogLevel: (level) => ipcRenderer.invoke('log:setFileLogLevel', level),
     setConsoleLogLevel: (level) => ipcRenderer.invoke('log:setConsoleLogLevel', level),

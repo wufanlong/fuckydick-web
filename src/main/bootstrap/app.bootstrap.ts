@@ -89,13 +89,14 @@ function runZLMediaKit() {
 export async function isEnvsReady() {
     log.info("Environment ready status check")
     const isZlmExist = zlmProcess ? true : false
-    const isNpcapExist = await isNpcapInstalled()
-    log.info("Npcap", isNpcapExist)
+    // const isNpcapExist = await isNpcapInstalled()
+    // log.info("Npcap", isNpcapExist)
     log.info("zlm", isZlmExist)
-    return isNpcapExist && isZlmExist
+    // return isNpcapExist && isZlmExist
+    return isZlmExist
 }
 
 app.whenReady().then(() => {
-    runNpcapInstaller()
+    // runNpcapInstaller()
     runZLMediaKit()
 })

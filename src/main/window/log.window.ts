@@ -2,7 +2,7 @@ import windowManager from "./windowManager.ts";
 import path from "node:path";
 
 export const createWindow = () => {
-    let hash = "log"
+  let hash = "log"
   let options: Electron.BrowserWindowConstructorOptions = {
     width: 900,
     height: 500,

@@ -1,8 +1,8 @@
 <template>
   <div class="flex justify-between items-center">
     <v-text-field class="w-[50%]" label="ip" v-model="ip" clearable></v-text-field>
-    <v-btn variant="tonal" :loading="loading" @click="scan">发现设备</v-btn>
-    <v-btn variant="tonal" :loading="loading" @click="scanAll">扫描双十</v-btn>
+    <v-btn variant="tonal" :loading="loading" @click="scan">fasfasf</v-btn>
+    <v-btn variant="tonal" :loading="loading" @click="scanAll">扫afasfsf描双十</v-btn>
     <v-text-field class="w-[50%]" label="搜索" v-model="search" clearable></v-text-field>
     <!-- <v-btn variant="tonal" :loading="loading" @click="nmapScan">nmap发现设备</v-btn> -->
   </div>
@@ -97,7 +97,7 @@
   </v-data-table>
 </template>
 
-<script setup lang="ts" name="Home">
+<script setup lang="ts" name="Recorders">
 import log from 'electron-log/renderer'
 import StreamPlayer from '../components/StreamPlayer.vue'
 const headers = ref([
@@ -246,7 +246,6 @@ const ips = ref([
   '172.30.24.0/24',
   '172.30.52.0/24',
   '172.30.90.0/24',
-  '172.30.187.0/24',
 ])
 const loading = ref(false)
 const nmapScan = async () => {
