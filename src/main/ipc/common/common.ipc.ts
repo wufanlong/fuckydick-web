@@ -1,5 +1,4 @@
 import { ipcMain } from "electron";
-import log from 'electron-log/main'
 import { getSDKByIP } from "../../device/factory/index.ts";
 import { isapiSDK } from "isapi-js-sdk";
 
@@ -21,5 +20,7 @@ ipcMain.handle("common:call", (_event, ip, fName, data) => {
         return sdk.setChannelNameByID(undefined, data)
     } else if (fName === 'putNetworkByID') {
         return sdk.putNetworkByID(undefined, data)
+    } else if (fName === 'getChannelStatusList') {
+        return sdk.getChannelStatusList()
     }
 });

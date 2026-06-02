@@ -11,7 +11,7 @@ if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
 }
 ipcMain.handle("config:readRecorderConfig", async (_event) => {
     log.info("读取录像机配置")
-  return jsonfile.readFile(recordersPath);
+    return jsonfile.readFile(recordersPath);
 });
 ipcMain.handle("config:writeRecorderConfig", async (_event, config) => {
     log.info("写入录像机配置", config)

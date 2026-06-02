@@ -1,100 +1,105 @@
 <template>
-  <div class="flex justify-between items-center">
-    <v-text-field class="w-[50%]" label="ip" v-model="ip" clearable></v-text-field>
-    <v-btn variant="tonal" :loading="loading" @click="scan">发现设备</v-btn>
-    <v-btn variant="tonal" :loading="loading" @click="scanAll">扫描双十</v-btn>
-    <v-text-field class="w-[50%]" label="搜索" v-model="search" clearable></v-text-field>
-    <!-- <v-btn variant="tonal" :loading="loading" @click="nmapScan">nmap发现设备</v-btn> -->
+  <div>
+    <div class="flex justify-between items-center">
+      <v-text-field class="w-[50%]" label="ip" v-model="ip" clearable></v-text-field>
+      <v-btn variant="tonal" :loading="loading" @click="scan">发现设备</v-btn>
+      <v-btn variant="tonal" :loading="loading" @click="scanAll">扫描双十</v-btn>
+      <v-text-field class="w-[50%]" label="搜索" v-model="search" clearable></v-text-field>
+      <!-- <v-btn variant="tonal" :loading="loading" @click="nmapScan">nmap发现设备</v-btn> -->
+    </div>
+    <v-data-table class="h-[100%]" multi-sort expand-on-click :loading="loading" hover striped="even" density="compact"
+      :search="search" items-per-page="50" :headers="headers" :items="devices" :item-value="item => item.ip"
+      v-model:page="pagination.pageNum" :item-key="item => item.ip" fixed-header items-per-page-text=""
+      show-current-page prev-page-label="dick">
+      <template v-slot:loading>
+        <v-skeleton-loader type="table-row@10"></v-skeleton-loader>
+      </template>
+      <template v-slot:item.data-table-expand="{ internalItem, isExpanded, toggleExpand }">
+        <v-btn :append-icon="isExpanded(internalItem) ? 'mdi-chevron-up' : 'mdi-chevron-down'"
+          :text="isExpanded(internalItem) ? '收起' : '更多'" class="text-none" color="medium-emphasis" size="small"
+          variant="text" width="105" border slim @click="toggleExpand(internalItem)"></v-btn>
+      </template>
+      <template v-slot:expanded-row="{ columns, item }">
+        <tr class="text-center">
+          <td :colspan="columns.length" class="py-2">
+            <v-btn size="x-small" variant="tonal" @click="preview(item.ip)">预览</v-btn>
+            <v-btn size="x-small" variant="tonal" @click="stopPreview(item.ip)">停止预览</v-btn>
+            <v-btn size="x-small" variant="tonal" @click="openSite(item.ip)">打开网页</v-btn>
+            <v-dialog max-width="500">
+              <template v-slot:activator="{ props: activatorProps }">
+                <v-btn v-bind="activatorProps" size="x-small" variant="tonal"
+                  @click="text = JSON.stringify(item.NetworkInterfaceList.NetworkInterface, null, 2)">修改ip</v-btn>
+              </template>
+              <template v-slot:default="{ isActive }">
+                <v-card title="修改ip">
+                  <v-card-text>
+                    <v-textarea rows="15" auto-grow v-model="text"></v-textarea>
+                  </v-card-text>
+                  <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn text="取消" @click="isActive.value = false"></v-btn>
+                    <v-btn text="确定" @click="putNetworkByID(item.ip); isActive.value = false"></v-btn>
+                  </v-card-actions>
+                </v-card>
+              </template>
+            </v-dialog>
+            <v-dialog max-width="500">
+              <template v-slot:activator="{ props: activatorProps }">
+                <v-btn v-bind="activatorProps" size="x-small" variant="tonal"
+                  @click="text = JSON.stringify(item.DeviceInfo, null, 2)">修改设备信息</v-btn>
+              </template>
+              <template v-slot:default="{ isActive }">
+                <v-card title="修改设备信息">
+                  <v-card-text>
+                    <v-textarea rows="15" auto-grow v-model="text"></v-textarea>
+                  </v-card-text>
+                  <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn text="取消" @click="isActive.value = false"></v-btn>
+                    <v-btn text="确定" @click="putDeviceInfo(item.ip); isActive.value = false"></v-btn>
+                  </v-card-actions>
+                </v-card>
+              </template>
+            </v-dialog>
+            <v-dialog max-width="500">
+              <template v-slot:activator="{ props: activatorProps }">
+                <v-btn v-bind="activatorProps" size="x-small" variant="tonal"
+                  @click="text = JSON.stringify(item.VideoInputChannel, null, 2)">修改通道名称</v-btn>
+              </template>
+              <template v-slot:default="{ isActive }">
+                <v-card title="修改通道名称">
+                  <v-card-text>
+                    <v-textarea rows="15" auto-grow v-model="text"></v-textarea>
+                  </v-card-text>
+                  <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn text="取消" @click="isActive.value = false"></v-btn>
+                    <v-btn text="确定" @click="setChannelNameByID(item.ip); isActive.value = false"></v-btn>
+                  </v-card-actions>
+                </v-card>
+              </template>
+            </v-dialog>
+            <v-btn size="x-small" variant="tonal" @click="basicRestore(item.ip)">简单恢复</v-btn>
+            <v-btn size="x-small" variant="tonal" @click="fullRestore(item.ip)">恢复出厂设置</v-btn>
+            <v-btn size="x-small" variant="tonal" @click="activate(item.ip)">激活</v-btn>
+            <v-btn size="x-small" variant="tonal" @click="reboot(item.ip)">重启</v-btn>
+          </td>
+        </tr>
+        <tr class="h-[400px]">
+          <td :colspan="columns.length" class="py-2">
+            <StreamPlayer :ref="el => setPlayerRef(el, item.ip)" class="w-[640px] h-[360px]" />
+          </td>
+        </tr>
+      </template>
+      <template v-slot:bottom="{ pageCount }">
+        <div class="flex items-center justify-between">
+          <div class="w-1/10 !px-4">共 {{ devices.length }} 个设备</div>
+          <v-pagination class="w-8/10" v-model="pagination.pageNum" :length="pageCount" size="x-small" />
+          <div class="w-1/10"></div>
+        </div>
+      </template>
+    </v-data-table>
   </div>
-  <v-data-table class="h-[90%]" multi-sort expand-on-click :loading="loading" hover striped="even" density="compact"
-    :search="search" items-per-page="50" :headers="headers" :items="devices" :item-value="item => item.ip"
-    v-model:page="pagination.pageNum" :item-key="item => item.ip" fixed-header items-per-page-text="" show-current-page
-    prev-page-label="dick">
-    <template v-slot:loading>
-      <v-skeleton-loader type="table-row@10"></v-skeleton-loader>
-    </template>
-    <template v-slot:item.data-table-expand="{ internalItem, isExpanded, toggleExpand }">
-      <v-btn :append-icon="isExpanded(internalItem) ? 'mdi-chevron-up' : 'mdi-chevron-down'"
-        :text="isExpanded(internalItem) ? '收起' : '更多'" class="text-none" color="medium-emphasis" size="small"
-        variant="text" width="105" border slim @click="toggleExpand(internalItem)"></v-btn>
-    </template>
-    <template v-slot:expanded-row="{ columns, item }">
-      <tr class="text-center">
-        <td :colspan="columns.length" class="py-2">
-          <v-btn size="x-small" variant="tonal" @click="preview(item.ip)">预览</v-btn>
-          <v-btn size="x-small" variant="tonal" @click="stopPreview(item.ip)">停止预览</v-btn>
-          <v-btn size="x-small" variant="tonal" @click="openSite(item.ip)">打开网页</v-btn>
-          <v-dialog max-width="500">
-            <template v-slot:activator="{ props: activatorProps }">
-              <v-btn v-bind="activatorProps" size="x-small" variant="tonal" @click="text=JSON.stringify(item.NetworkInterfaceList.NetworkInterface, null, 2)">修改ip</v-btn>
-            </template>
-            <template v-slot:default="{ isActive }">
-              <v-card title="修改ip">
-                <v-card-text>
-                  <v-textarea rows="15" auto-grow v-model="text"></v-textarea>
-                </v-card-text>
-                <v-card-actions>
-                  <v-spacer></v-spacer>
-                  <v-btn text="取消" @click="isActive.value = false"></v-btn>
-                  <v-btn text="确定" @click="putNetworkByID(item.ip);isActive.value = false"></v-btn>
-                </v-card-actions>
-              </v-card>
-            </template>
-          </v-dialog>
-          <v-dialog max-width="500">
-            <template v-slot:activator="{ props: activatorProps }">
-              <v-btn v-bind="activatorProps" size="x-small" variant="tonal" @click="text=JSON.stringify(item.DeviceInfo, null, 2)">修改设备信息</v-btn>
-            </template>
-            <template v-slot:default="{ isActive }">
-              <v-card title="修改设备信息">
-                <v-card-text>
-                  <v-textarea rows="15" auto-grow v-model="text"></v-textarea>
-                </v-card-text>
-                <v-card-actions>
-                  <v-spacer></v-spacer>
-                  <v-btn text="取消" @click="isActive.value = false"></v-btn>
-                  <v-btn text="确定" @click="putDeviceInfo(item.ip);isActive.value = false"></v-btn>
-                </v-card-actions>
-              </v-card>
-            </template>
-          </v-dialog>
-          <v-dialog max-width="500">
-            <template v-slot:activator="{ props: activatorProps }">
-              <v-btn v-bind="activatorProps" size="x-small" variant="tonal" @click="text=JSON.stringify(item.VideoInputChannel, null, 2)">修改通道名称</v-btn>
-            </template>
-            <template v-slot:default="{ isActive }">
-              <v-card title="修改通道名称">
-                <v-card-text>
-                  <v-textarea rows="15" auto-grow v-model="text"></v-textarea>
-                </v-card-text>
-                <v-card-actions>
-                  <v-spacer></v-spacer>
-                  <v-btn text="取消" @click="isActive.value = false"></v-btn>
-                  <v-btn text="确定" @click="setChannelNameByID(item.ip);isActive.value = false"></v-btn>
-                </v-card-actions>
-              </v-card>
-            </template>
-          </v-dialog>
-          <v-btn size="x-small" variant="tonal" @click="basicRestore(item.ip)">简单恢复</v-btn>
-          <v-btn size="x-small" variant="tonal" @click="fullRestore(item.ip)">恢复出厂设置</v-btn>
-          <v-btn size="x-small" variant="tonal" @click="activate(item.ip)">激活</v-btn>
-          <v-btn size="x-small" variant="tonal" @click="reboot(item.ip)">重启</v-btn>
-        </td>
-      </tr>
-      <tr class="h-[400px]">
-        <td :colspan="columns.length" class="py-2">
-          <StreamPlayer :ref="el => setPlayerRef(el, item.ip)" class="w-[640px] h-[360px]" />
-        </td>
-      </tr>
-    </template>
-    <template v-slot:bottom="{ pageCount }">
-      <div class="flex items-center justify-between">
-        <div class="w-1/10 !px-4">共 {{ devices.length }} 个设备</div>
-        <v-pagination class="w-8/10" v-model="pagination.pageNum" :length="pageCount" size="x-small" />
-        <div class="w-1/10"></div>
-      </div>
-    </template>
-  </v-data-table>
 </template>
 
 <script setup lang="ts" name="Home">
@@ -211,6 +216,9 @@ const pagination = reactive({
   pageNum: 1,
 })
 const players = reactive({})
+let removeDeviceUpdatedListener: (() => void) | undefined
+let removeDeviceInitFailedListener: (() => void) | undefined
+
 const setPlayerRef = (el, ip) => {
   if (el) {
     players[ip] = el
@@ -219,7 +227,7 @@ const setPlayerRef = (el, ip) => {
   }
 }
 onMounted(() => {
-  window.device.onDeviceUpdated((device) => {
+  removeDeviceUpdatedListener = window.device.onDeviceUpdated((device) => {
     const d = devices.value.find(d => d.ip === device.ip)
     if (!d) {
       devices.value.push(device)
@@ -227,12 +235,16 @@ onMounted(() => {
       Object.assign(d, device)
     }
   })
-  window.device.onDeviceInitFailed((ip) => {
+  removeDeviceInitFailedListener = window.device.onDeviceInitFailed((ip) => {
     devices.value = devices.value.filter(d => d.ip !== ip)
   })
   // scan()
 })
 
+onUnmounted(() => {
+  removeDeviceUpdatedListener?.()
+  removeDeviceInitFailedListener?.()
+})
 // const ip = ref('192.168.1.0/24')
 // const ip = ref('172.30.179.0/24')
 const ip = ref('172.30.0.0/24')

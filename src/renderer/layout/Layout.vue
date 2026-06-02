@@ -1,24 +1,12 @@
 <template>
-  <div class="h-full flex flex-row justify-center">
-    <v-tabs
-      v-model="tab"
-      class="h-full"
-      align-tabs="center"
-      direction="vertical"
-      color="deep-purple-accent-4"
-    >
+  <div class="h-full flex flex-row">
+    <v-tabs v-model="tab" class="h-full" align-tabs="center" direction="vertical" color="deep-purple-accent-4">
       <v-tab v-for="tab in tabs" :key="tab.value" :value="tab.value">
         {{ tab.label }}
       </v-tab>
     </v-tabs>
-    <v-tabs-window class="flex-grow h-full" v-model="tab">
-      <v-tabs-window-item
-        class="h-full"
-        v-for="tab in tabs" :key="tab.value" :value="tab.value"
-      >
-        <router-view />
-    </v-tabs-window-item>
-  </v-tabs-window>
+    <v-divider vertical inset class="mx-2"></v-divider>
+    <router-view class="w-[94%] h-[90%]"/>
   </div>
 </template>
 

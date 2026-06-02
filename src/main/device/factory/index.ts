@@ -5,8 +5,7 @@ import net from "net";
 
 const sdks: Array<isapiSDK> = [];
 
-export function createDevice(ip: string) {
-  let password = "sszx123456";
+export function createDevice(ip: string, password="sszx123456") {
   if (ip.startsWith("172.30.24.")) {
     password = "abc123456";
   }
@@ -44,15 +43,8 @@ export function createDevice(ip: string) {
   sdk.on("log:error", (message) => {
     log.error(message);
   });
-  return sdk;
+  sdks.push(sdk);
 }
-// export function batchCreateDevices(ips: Array<string> | string) {
-//   sdks.length = 0;
-//   for (let i = 0; i < ips.length; i++) {
-//     sdks.push(createDevice(ips[i]));
-//   }
-//   return sdks;
-// }
 
 export async function batchCreateDevices(ips: string[]) {
   sdks.length = 0
@@ -65,8 +57,8 @@ export async function batchCreateDevices(ips: string[]) {
       const ip = ips[index++]
       const open = await checkPort(ip, 80)
 
-      if (open) {
-        sdks.push(createDevice(ip))
+      if (open && !sdks.find(sdk => sdk.ip === ip)) {
+        createDevice(ip)
       }
       await new Promise(r => setTimeout(r, 50))
     }

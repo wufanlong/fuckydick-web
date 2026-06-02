@@ -1,13 +1,15 @@
 import { ipcMain } from "electron";
 import log from "electron-log/main";
-import { isapiSDK } from "isapi-js-sdk";
 import windowManager from "../../window/windowManager.ts";
-import { batchCreateDevices } from "../../device/factory/index.ts";
+import { batchCreateDevices, createDevice } from "../../device/factory/index.ts";
 
+ipcMain.handle("device:createIsapiSDKInstance", (_event, ip, password) => {
+  log.info("creating ISAPI SDK instances for IP:", ip, password);
+  createDevice(ip, password)
+});
 ipcMain.handle("device:updateIsapiSDKInstance", (_event, ips) => {
   log.info("Updating ISAPI SDK instances for IPs:", ips);
-  sdks.length = 0;
-  sdks.push(...batchCreateDevices(ips));
+  batchCreateDevices(ips)
 });
 ipcMain.handle("device:site", (_event, ip) => {
   const window = windowManager.getByName(ip);
