@@ -2,9 +2,13 @@
   <div>
     <v-tabs color="deep-purple-accent-4" align-tabs="center" stacked v-model="tab" center-active @click="clickTab()">
       <v-tab v-for="recorder in recorders" :key="recorder.id" :value="recorder.id">
-        <div>{{ recorder.deviceName }}</div>
-        <div>{{ recorder.ip }}</div>
-        <div v-if="recorder.offlineCount && recorder.offlineCount !== 0">{{ `${recorder.offlineCount}个异常` }}</div>
+        <v-badge floating  location="top right" :offset-x="5" color="error" :content="recorder.offlineCount" :model-value="recorder.offlineCount && recorder.offlineCount !== 0">
+          <div class="flex flex-col justify-center align-center">
+            <div>{{ recorder.deviceName }}</div>
+            <div class="text-[11px]">{{ recorder.ip }}</div>
+            <!-- <div v-if="recorder.offlineCount && recorder.offlineCount !== 0">{{ `${recorder.offlineCount}个异常` }}</div> -->
+          </div>
+        </v-badge>
       </v-tab>
     </v-tabs>
     <v-virtual-scroll class="h-full w-full" :items="[1]">
@@ -69,7 +73,14 @@ onMounted(() => {
     }
     const recorder = recorders.value.find(recorder => recorder.ip === device.ip)
     const currentRecorder = recorders.value.find(r => r.id === tab.value)
+    if (device.ip === "172.30.52.250") {
+      console.log("device", device)
+    }
     if (recorder) {
+      const deviceName = device.DeviceInfo?.deviceName
+      if (deviceName) {
+        recorder.deviceName = deviceName
+      }
       window.api.common.call(device.ip, 'getChannelStatusList').then(res => {
         Object.assign(recorders.value.find(recorder => recorder.ip === device.ip), {
           ...recorder,
@@ -95,6 +106,10 @@ onUnmounted(() => {
 })
 watch(recorders.value, newVal => {
   tab.value = newVal[0].id
+  let filteredDevices = devices.value.filter(d => newVal.find(r => r.ip === d.ip))
+  if (recorders.value.length === filteredDevices.length) {
+    saveRecorders()
+  }
 })
 watch(channelStatusList.value, newVal => {
   for (const ip in players) {
@@ -103,12 +118,23 @@ watch(channelStatusList.value, newVal => {
       delete players[ip]
     }
   }
-  
   // 创建摄像机设备
   for (let i = 0; i < newVal.length; i++) {
     window.device.createIsapiSDKInstance(newVal[i].sourceInputPortDescriptor.ipAddress)
   }
 })
+const saveRecorders = () => {
+  let arr = []
+  for (let i = 0; i < recorders.value.length; i++) {
+    let obj = {}
+    Object.assign(obj, recorders.value[i])
+    delete obj.channelStatusList
+    delete obj.offlineCount
+    arr.push(obj)
+  }
+  
+  window.system.config.writeRecorderConfig(JSON.stringify(arr))
+}
 const clickTab = () => {
   stopPreviewAll()
   const currentRecorder = recorders.value.find(r => r.id === tab.value)

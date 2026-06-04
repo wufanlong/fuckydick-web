@@ -2,19 +2,36 @@ import log from "electron-log/main";
 import { isapiSDK } from "isapi-js-sdk";
 import windowManager from "../../window/windowManager.ts";
 import net from "net";
+import { readDeviceConfig, writeDeviceConfig } from "../../ipc/system/config.ipc.ts";
 
 const sdks: Array<isapiSDK> = [];
-
+let devicesJson : Array<{ id: number, deviceName: string, place: string, ip: string, password: string }> = [];
+async function init() {
+  devicesJson.push(...JSON.parse(await readDeviceConfig()))
+}
+export function updateDevicesJson(newConfig: Array<{ id: number, deviceName: string, place: string, ip: string, password: string }>) {
+  devicesJson = newConfig
+}
+init();
 export function createDevice(ip: string, password="sszx123456") {
   if (ip.startsWith("172.30.24.")) {
     password = "abc123456";
   }
+  password = devicesJson.find(device => device.ip === ip.substring(0, ip.lastIndexOf(".")) + ".0/24")?.password || password
+  password = devicesJson.find(device => device.ip === ip)?.password || password
   const sdk = new isapiSDK(ip, "admin", password);
   try {
     sdk.init();
   } catch (err) {
   }
   sdk.on('deviceUpdated', (device) => {
+    if (devicesJson.length !== 0) {
+      let deviceJson = devicesJson.find(d => d.ip === device.ip)
+      if (deviceJson && deviceJson.deviceName !== device.DeviceInfo?.deviceName) {
+        deviceJson.deviceName = device.DeviceInfo?.deviceName || devicesJson.find(d => d.ip === device.ip)?.deviceName || ""
+        writeDeviceConfig(JSON.stringify(devicesJson));
+      }
+    }
     windowManager
       .getByName("mainWindow")
       .webContents.send("deviceUpdated", JSON.parse(JSON.stringify(device)));
@@ -26,7 +43,7 @@ export function createDevice(ip: string, password="sszx123456") {
         } else {
           console.log(`SDK init failed for IP ${sdk.ip}:`, err.message || err.error)
         }
-    } 
+    }
     windowManager
       .getByName("mainWindow")
       .webContents.send("deviceInitFailed", sdk.ip);

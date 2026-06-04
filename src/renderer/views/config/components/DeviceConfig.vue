@@ -1,11 +1,11 @@
 <template>
   <v-sheet border rounded>
     <v-data-table items-per-page="30" :search="search" items-per-page-text="" hover striped="even" :headers="headers" density="compact"
-      :hide-default-footer="recorders.length < 11" :items="recorders">
+      :hide-default-footer="devices.length < 11" :items="devices">
       <template v-slot:top>
         <v-toolbar flat>
           <v-toolbar-title>
-            录像机配置
+            设备管理
           </v-toolbar-title>
           
           <v-text-field label="搜索" class="mr-4" v-model="search" hide-details max-width="344" density="compact" clearable></v-text-field>
@@ -25,8 +25,8 @@
   </v-sheet>
 
   <v-dialog v-model="dialog" max-width="500">
-    <v-card :title="`${isEditing ? '修改' : '新增'}录像机`"
-      :subtitle="`${isEditing ? '修改' : '新增'}${isEditing ? formModel.deviceName : '录像机'}`">
+    <v-card :title="`${isEditing ? '修改' : '新增'}设备`"
+      :subtitle="`${isEditing ? '修改' : '新增'}${isEditing ? formModel.deviceName : '设备'}`">
       <template v-slot:text>
         <v-row>
           <v-col cols="12">
@@ -56,7 +56,7 @@
     </v-card>
   </v-dialog>
 </template>
-<script setup lang="ts" name="RecordersConfig">
+<script setup lang="ts" name="DeviceConfig">
 import { shallowRef } from 'vue'
 
 
@@ -64,7 +64,7 @@ function createNewRecord() {
   return { id: null, deviceName: null, place: null, ip: null, password: null }
 }
 
-const recorders = ref([])
+const devices = ref([])
 const formModel = ref(createNewRecord())
 const dialog = shallowRef(false)
 const isEditing = ref(false)
@@ -85,12 +85,12 @@ onMounted(() => {
 
 function copy(id) {
   isEditing.value = false
-  const found = recorders.value.find(recorder => recorder.id === id)
+  const found = devices.value.find(recorder => recorder.id === id)
   formModel.value = createNewRecord()
   Object.assign(formModel.value, found)
   formModel.value.id = Date.now()
 
-  window.system.config.writeRecorderConfig(JSON.stringify(recorders.value))
+  window.system.config.writeDeviceConfig(JSON.stringify(devices.value))
   save()
 }
 function add() {
@@ -101,7 +101,7 @@ function add() {
 
 function edit(id) {
   isEditing.value = true
-  const found = recorders.value.find(recorder => recorder.id === id)
+  const found = devices.value.find(recorder => recorder.id === id)
 
   formModel.value = {
     id: found.id,
@@ -115,28 +115,27 @@ function edit(id) {
 }
 
 function remove(id) {
-  const index = recorders.value.findIndex(recorder => recorder.id === id)
-  recorders.value.splice(index, 1)
-  window.system.config.writeRecorderConfig(JSON.stringify(recorders.value))
+  const index = devices.value.findIndex(recorder => recorder.id === id)
+  devices.value.splice(index, 1)
+  window.system.config.writeDeviceConfig(JSON.stringify(devices.value))
 }
 
 function save() {
   if (isEditing.value) {
-    const index = recorders.value.findIndex(recorder => recorder.id === formModel.value.id)
-    recorders.value[index] = formModel.value
+    const index = devices.value.findIndex(recorder => recorder.id === formModel.value.id)
+    devices.value[index] = formModel.value
   } else {
     formModel.value.id = Date.now()
-    recorders.value.push(formModel.value)
+    devices.value.push(formModel.value)
   }
-  window.system.config.writeRecorderConfig(JSON.stringify(recorders.value))
+  window.system.config.writeDeviceConfig(JSON.stringify(devices.value))
 
   dialog.value = false
 }
 
 async function init() {
-  
   dialog.value = false
   formModel.value = createNewRecord()
-  recorders.value.push(...JSON.parse(await window.system.config.readRecorderConfig()))
+  devices.value.push(...JSON.parse(await window.system.config.readDeviceConfig()))
 }
 </script>

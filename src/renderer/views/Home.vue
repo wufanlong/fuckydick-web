@@ -1,10 +1,11 @@
 <template>
   <div>
-    <div class="flex justify-between items-center">
-      <v-text-field class="w-[50%]" label="ip" v-model="ip" clearable></v-text-field>
+    <div class="flex justify-between items-center my-4">
+      <v-text-field class="w-[50%]" label="ip" v-model="ip" hide-details density="compact" clearable></v-text-field>
       <v-btn variant="tonal" :loading="loading" @click="scan">发现设备</v-btn>
       <v-btn variant="tonal" :loading="loading" @click="scanAll">扫描双十</v-btn>
-      <v-text-field class="w-[50%]" label="搜索" v-model="search" clearable></v-text-field>
+      <v-btn variant="tonal" @click="syncAllDeviceNames">同步所有设备名称为通道名称</v-btn>
+      <v-text-field class="w-[50%]" label="搜索" v-model="search" hide-details density="compact" clearable></v-text-field>
       <!-- <v-btn variant="tonal" :loading="loading" @click="nmapScan">nmap发现设备</v-btn> -->
     </div>
     <v-data-table class="h-[100%]" multi-sort expand-on-click :loading="loading" hover striped="even" density="compact"
@@ -211,6 +212,7 @@ const headers = ref([
 ])
 const text = ref('')
 const devices = ref([])
+const devicesJson = ref([])
 const search = ref('')
 const pagination = reactive({
   pageNum: 1,
@@ -227,6 +229,7 @@ const setPlayerRef = (el, ip) => {
   }
 }
 onMounted(() => {
+  init()
   removeDeviceUpdatedListener = window.device.onDeviceUpdated((device) => {
     const d = devices.value.find(d => d.ip === device.ip)
     if (!d) {
@@ -240,6 +243,10 @@ onMounted(() => {
   })
   // scan()
 })
+
+async function init() {
+  devicesJson.value.push(...JSON.parse(await window.system.config.readDeviceConfig()))
+}
 
 onUnmounted(() => {
   removeDeviceUpdatedListener?.()
@@ -261,24 +268,6 @@ const ips = ref([
   '172.30.187.0/24',
 ])
 const loading = ref(false)
-const nmapScan = async () => {
-  try {
-    devices.value.length = 0
-    loading.value = true
-    const sm = new Date().getTime()
-    log.info('开始扫描设备：', ip.value)
-    const result = await window.system.nmapScan.fast(ip.value)
-    const em = new Date().getTime()
-    log.info('扫描设备完成，耗时：', em - sm + 'ms')
-    log.silly('扫描设备结果', result, '\n设备总数' + result.length)
-    devices.value.push(...result)
-    loading.value = false
-    window.device.updateIsapiSDKInstance(devices.value.map(d => d.ip))
-  } catch (err) {
-    log.error('扫描设备失败', err)
-    loading.value = false
-  }
-}
 const scanAll = async () => {
   try {
     devices.value.length = 0
@@ -303,15 +292,48 @@ const scan = async () => {
     loading.value = false
   }
 }
+// const syncAllDeviceNames = async () => {
+//   for (let i = 0; i < devices.value.length; i++) {
+//     const device = devices.value[i]
+//     if (device.VideoInputChannel?.name && device.DeviceInfo?.deviceName !== device.VideoInputChannel.name) {
+//       console.log(`同步设备名称 ${device.DeviceInfo?.deviceName} -> ${device.VideoInputChannel.name}`)
+//       let obj = {}
+//       Object.assign(obj, device.DeviceInfo)
+//       obj.deviceName = device.VideoInputChannel.name
+//       await window.api.common.call(device.ip, 'putDeviceInfo', JSON.parse(JSON.stringify(obj)))
+//     }
+//   }
+// }
+const syncAllDeviceNames = async () => {
+  for (const device of devices.value) {
+    try {
+      if (device.VideoInputChannel?.name && device.DeviceInfo?.deviceName !== device.VideoInputChannel.name ) {
+        const obj = {
+          ...device.DeviceInfo,
+          deviceName: device.VideoInputChannel.name
+        }
+        await window.api.common.call(
+          device.ip,
+          'putDeviceInfo',
+          JSON.parse(JSON.stringify(obj))
+        )
+      }
+    } catch (err) {
+      console.error(`${device.ip}修改设备信息失败`, err)
 
+      // 继续下一台设备
+      continue
+    }
+  }
+}
 const preview = async (ip) => {
   players[ip].start(ip)
 }
 const stopPreview = (ip) => {
   players[ip].stop(ip)
 }
-const putDeviceInfo = async (ip) => {
-  window.api.common.call(ip, 'putDeviceInfo', JSON.parse(text.value)).then(res => {
+const putDeviceInfo = async (ip, DeviceInfo = text.value) => {
+  window.api.common.call(ip, 'putDeviceInfo', JSON.parse(DeviceInfo)).then(res => {
     log.debug(ip, res)
   }).catch((err) => {
     log.error(err)

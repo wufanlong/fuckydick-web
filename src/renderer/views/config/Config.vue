@@ -4,12 +4,15 @@
     <template v-slot:default="{ item }">
         <RecordersConfig />
         <v-divider inset class="my-4"></v-divider>
+        <DeviceConfig />
+        <v-divider inset class="my-4"></v-divider>
     </template>
   </v-virtual-scroll>
 </template>
 
 <script setup lang="ts" name="Config">
 import RecordersConfig from './components/RecordersConfig.vue'
+import DeviceConfig from './components/DeviceConfig.vue'
 </script>
 
 <style scoped>

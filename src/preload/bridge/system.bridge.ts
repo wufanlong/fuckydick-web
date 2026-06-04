@@ -12,7 +12,9 @@ contextBridge.exposeInMainWorld('system', {
   },
   config: {
     writeRecorderConfig: (config) => ipcRenderer.invoke('config:writeRecorderConfig', config),
-    readRecorderConfig: () => ipcRenderer.invoke('config:readRecorderConfig')
+    readRecorderConfig: () => ipcRenderer.invoke('config:readRecorderConfig'),
+    writeDeviceConfig: (config) => ipcRenderer.invoke('config:writeDeviceConfig', config),
+    readDeviceConfig: () => ipcRenderer.invoke('config:readDeviceConfig'),
   },
   log: {
     setFileLogLevel: (level) => ipcRenderer.invoke('log:setFileLogLevel', level),
