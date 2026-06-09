@@ -23,5 +23,8 @@ contextBridge.exposeInMainWorld('system', {
       callback(message);
     }),
     getLog: () => ipcRenderer.invoke("log:getLog")
+  },
+  data: {
+    exportToExcel: (json) => ipcRenderer.invoke('data:exportToExcel', json)
   }
 })

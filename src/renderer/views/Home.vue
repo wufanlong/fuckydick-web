@@ -5,6 +5,7 @@
       <v-btn variant="tonal" :loading="loading" @click="scan">发现设备</v-btn>
       <v-btn variant="tonal" :loading="loading" @click="scanAll">扫描双十</v-btn>
       <v-btn variant="tonal" @click="syncAllDeviceNames">同步所有设备名称为通道名称</v-btn>
+      <v-btn variant="tonal" @click="exportToExcel">导出excel</v-btn>
       <v-text-field class="w-[50%]" label="搜索" v-model="search" hide-details density="compact" clearable></v-text-field>
       <!-- <v-btn variant="tonal" :loading="loading" @click="nmapScan">nmap发现设备</v-btn> -->
     </div>
@@ -14,6 +15,9 @@
       show-current-page prev-page-label="dick">
       <template v-slot:loading>
         <v-skeleton-loader type="table-row@10"></v-skeleton-loader>
+      </template>
+      <template v-slot:item.DeviceInfo.serialNumber="{ value, item }">
+        {{ value.replace(item.DeviceInfo.model, '') }}
       </template>
       <template v-slot:item.data-table-expand="{ internalItem, isExpanded, toggleExpand }">
         <v-btn :append-icon="isExpanded(internalItem) ? 'mdi-chevron-up' : 'mdi-chevron-down'"
@@ -259,12 +263,15 @@ const ip = ref('172.30.0.0/24')
 // const ip = ref('172.30.0.245')
 // const ip = ref('192.168.1.64')
 const ips = ref([
-  '172.30.0.0/24',
-  '172.30.1.0/24',
-  '172.30.42.0/24',
-  '172.30.24.0/24',
-  '172.30.52.0/24',
-  '172.30.90.0/24',
+  // '172.30.0.0/24',
+  // '172.30.1.0/24',
+  // '172.30.42.0/24',
+  // '172.30.24.0/24',
+  // '172.30.52.0/24',
+  // '172.30.90.0/24',
+  '172.30.184.0/24',
+  '172.30.185.0/24',
+  '172.30.186.0/24',
   '172.30.187.0/24',
 ])
 const loading = ref(false)
@@ -325,6 +332,9 @@ const syncAllDeviceNames = async () => {
       continue
     }
   }
+}
+const exportToExcel = () => {
+  window.system.data.exportToExcel(JSON.stringify(devices.value))
 }
 const preview = async (ip) => {
   players[ip].start(ip)

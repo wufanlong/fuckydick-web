@@ -2,7 +2,7 @@
   <div>
     <v-tabs color="deep-purple-accent-4" align-tabs="center" stacked v-model="tab" center-active @click="clickTab()">
       <v-tab v-for="recorder in recorders" :key="recorder.id" :value="recorder.id">
-        <v-badge floating  location="top right" :offset-x="5" color="error" :content="recorder.offlineCount" :model-value="recorder.offlineCount && recorder.offlineCount !== 0">
+        <v-badge floating  location="top right" :offset-x="5" color="error" :content="recorder.offlineCount" :model-value="recorder.offlineCount !== 0">
           <div class="flex flex-col justify-center align-center">
             <div>{{ recorder.deviceName }}</div>
             <div class="text-[11px]">{{ recorder.ip }}</div>
