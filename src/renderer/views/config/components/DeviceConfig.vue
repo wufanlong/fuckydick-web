@@ -1,6 +1,6 @@
 <template>
   <v-sheet border rounded>
-    <v-data-table items-per-page="30" :search="search" items-per-page-text="" hover striped="even" :headers="headers" density="compact"
+    <v-data-table items-per-page="30" :search="search" items-per-page-text="" hover striped="even" :headers="headers" density="compact" multi-sort
       :hide-default-footer="devices.length < 11" :items="devices">
       <template v-slot:top>
         <v-toolbar flat>

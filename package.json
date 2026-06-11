@@ -43,6 +43,7 @@
     "@mdi/font": "^7.4.47",
     "@network-utils/ip-range": "^1.0.2",
     "@tailwindcss/vite": "^4.1.18",
+    "dayjs": "^1.11.21",
     "electron-log": "^5.4.3",
     "electron-squirrel-startup": "^1.0.1",
     "isapi-js-sdk": "file:C:\\Users\\Administrator\\Desktop\\wufanlong\\project\\isapi-js-sdk",

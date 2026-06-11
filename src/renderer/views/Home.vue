@@ -5,6 +5,7 @@
       <v-btn variant="tonal" :loading="loading" @click="scan">发现设备</v-btn>
       <v-btn variant="tonal" :loading="loading" @click="scanAll">扫描双十</v-btn>
       <v-btn variant="tonal" @click="syncAllDeviceNames">同步所有设备名称为通道名称</v-btn>
+      <v-btn variant="tonal" @click="syncAllDeviceTimes">同步所有设备时间</v-btn>
       <v-btn variant="tonal" @click="exportToExcel">导出excel</v-btn>
       <v-text-field class="w-[50%]" label="搜索" v-model="search" hide-details density="compact" clearable></v-text-field>
       <!-- <v-btn variant="tonal" :loading="loading" @click="nmapScan">nmap发现设备</v-btn> -->
@@ -30,6 +31,7 @@
             <v-btn size="x-small" variant="tonal" @click="preview(item.ip)">预览</v-btn>
             <v-btn size="x-small" variant="tonal" @click="stopPreview(item.ip)">停止预览</v-btn>
             <v-btn size="x-small" variant="tonal" @click="openSite(item.ip)">打开网页</v-btn>
+            <v-btn size="x-small" variant="tonal" @click="syncTime(item.ip)">同步本机时间</v-btn>
             <v-dialog max-width="500">
               <template v-slot:activator="{ props: activatorProps }">
                 <v-btn v-bind="activatorProps" size="x-small" variant="tonal"
@@ -110,6 +112,14 @@
 <script setup lang="ts" name="Home">
 import log from 'electron-log/renderer'
 import StreamPlayer from '../components/StreamPlayer.vue'
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';        // 引入 UTC 插件
+import timezone from 'dayjs/plugin/timezone'; // 引入时区插件
+
+// 注册插件（这一步不能少！）
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
 const headers = ref([
   {
     title: '状态',
@@ -299,22 +309,34 @@ const scan = async () => {
     loading.value = false
   }
 }
-// const syncAllDeviceNames = async () => {
-//   for (let i = 0; i < devices.value.length; i++) {
-//     const device = devices.value[i]
-//     if (device.VideoInputChannel?.name && device.DeviceInfo?.deviceName !== device.VideoInputChannel.name) {
-//       console.log(`同步设备名称 ${device.DeviceInfo?.deviceName} -> ${device.VideoInputChannel.name}`)
-//       let obj = {}
-//       Object.assign(obj, device.DeviceInfo)
-//       obj.deviceName = device.VideoInputChannel.name
-//       await window.api.common.call(device.ip, 'putDeviceInfo', JSON.parse(JSON.stringify(obj)))
-//     }
-//   }
-// }
+const syncAllDeviceTimes = async () => {
+  for (const device of devices.value) {
+    try {
+      await syncTime(device.ip)
+    } catch (err) {
+      console.error(`${device.ip}修改设备信息失败`, err)
+
+      // 继续下一台设备
+      continue
+    }
+  }
+}
+const syncTime = async (ip) => {
+  const Time = {
+    "timeMode": "manual",
+    "localTime": dayjs(new Date()).tz('Asia/Shanghai').format(),
+    "timeZone": "CST-8:00:00"
+  }
+  await window.api.common.call(
+    ip,
+    'putTime',
+    JSON.parse(JSON.stringify(Time))
+  )
+}
 const syncAllDeviceNames = async () => {
   for (const device of devices.value) {
     try {
-      if (device.VideoInputChannel?.name && device.DeviceInfo?.deviceName !== device.VideoInputChannel.name ) {
+      if (device.VideoInputChannel?.name && device.DeviceInfo?.deviceName !== device.VideoInputChannel.name) {
         const obj = {
           ...device.DeviceInfo,
           deviceName: device.VideoInputChannel.name
