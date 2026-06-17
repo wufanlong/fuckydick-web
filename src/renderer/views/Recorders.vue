@@ -17,7 +17,7 @@
           <v-card v-for="device in channelStatusList" :title="devices.find(d => d.ip === device.sourceInputPortDescriptor.ipAddress)?.VideoInputChannel?.name" :subtitle="device.sourceInputPortDescriptor.ipAddress"
             class="deviceCard !mx-3 !my-2 hover:scale-102" :color="getColor(device.chanDetectResult)" variant="tonal">
             <v-card-item>
-              <StreamPlayer :ref="el => setPlayerRef(el, device.sourceInputPortDescriptor.ipAddress)"
+              <StreamPlayer :devices="devicesJson" :ref="el => setPlayerRef(el, device.sourceInputPortDescriptor.ipAddress)"
                 class="w-[360px] h-[202.5px]" />
             </v-card-item>
             <v-card-actions>
@@ -56,6 +56,7 @@ const texts = reactive({
 })
 const channelStatusList = ref([])
 const devices = ref([])
+const devicesJson = ref([])
 const tab = ref(0)
 const players = reactive({})
 let removeDeviceUpdatedListener: (() => void) | undefined
@@ -64,7 +65,6 @@ let removeDeviceInitFailedListener: (() => void) | undefined
 onMounted(() => {
   init()
   removeDeviceUpdatedListener = window.device.onDeviceUpdated((device) => {
-    console.log(device)
     const d = devices.value.find(d => d.ip === device.ip)
     if (!d) {
       devices.value.push(device)
@@ -73,12 +73,13 @@ onMounted(() => {
     }
     const recorder = recorders.value.find(recorder => recorder.ip === device.ip)
     const currentRecorder = recorders.value.find(r => r.id === tab.value)
-    if (device.ip === "172.30.52.250") {
-      console.log("device", device)
-    }
     if (recorder) {
       const deviceName = device.DeviceInfo?.deviceName
       if (deviceName) {
+        if (recorder.deviceName !== deviceName) {
+          recorder.deviceName = deviceName
+          saveRecorders()
+        }
         recorder.deviceName = deviceName
       }
       window.api.common.call(device.ip, 'getChannelStatusList').then(res => {
@@ -175,6 +176,7 @@ const stopPreview = (ip) => {
 }
 async function init() {
   recorders.value.push(...JSON.parse(await window.system.config.readRecorderConfig()))
+  devicesJson.value.push(...JSON.parse(await window.system.config.readDeviceConfig()))
   for (let i = 0; i < recorders.value.length; i++) {
     window.device.createIsapiSDKInstance(recorders.value[i].ip, recorders.value[i].password)
   }

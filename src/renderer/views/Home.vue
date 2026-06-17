@@ -94,7 +94,7 @@
         </tr>
         <tr class="h-[400px]">
           <td :colspan="columns.length" class="py-2">
-            <StreamPlayer :ref="el => setPlayerRef(el, item.ip)" class="w-[640px] h-[360px]" />
+            <StreamPlayer :devices="devicesJson" :ref="el => setPlayerRef(el, item.ip)" class="w-[640px] h-[360px]" />
           </td>
         </tr>
       </template>
@@ -273,12 +273,12 @@ const ip = ref('172.30.0.0/24')
 // const ip = ref('172.30.0.245')
 // const ip = ref('192.168.1.64')
 const ips = ref([
-  // '172.30.0.0/24',
-  // '172.30.1.0/24',
-  // '172.30.42.0/24',
-  // '172.30.24.0/24',
-  // '172.30.52.0/24',
-  // '172.30.90.0/24',
+  '172.30.0.0/24',
+  '172.30.1.0/24',
+  '172.30.42.0/24',
+  '172.30.24.0/24',
+  '172.30.52.0/24',
+  '172.30.90.0/24',
   '172.30.184.0/24',
   '172.30.185.0/24',
   '172.30.186.0/24',

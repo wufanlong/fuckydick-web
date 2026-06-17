@@ -9,21 +9,24 @@ import log from 'electron-log/renderer'
 const devices = ref([])
 const videoEl = ref(null)
 const props = defineProps({
+  devices: {
+    type: Array,
+    default: []
+  }
 })
 const app = 'live'  // ZLM 默认应用名
 const pc = ref(null)
 const pull = async (ip) => {
-  console.log(devices.value)
   let password = "sszx123456"
-  password = devices.value.find(device => device.ip === ip.substring(0, ip.lastIndexOf(".")) + ".0/24")?.password || password
-  password = devices.value.find(device => device.ip === ip)?.password || password
+  password = props.devices.find(device => device.ip === ip.substring(0, ip.lastIndexOf(".")) + ".0/24")?.password || password
+  password = props.devices.find(device => device.ip === ip)?.password || password
   const url = `rtsp://admin:${password}@${ip}:554/Streaming/Channels/101`
   const response = await fetch(`http://127.0.0.1/index/api/addStreamProxy?app=${app}&stream=${ip}&type=play&secret=aev5nuiInWrzIEKJMJc5suXzE6nhIdgI&vhost=__defaultVhost__&url=${url}`)
   return response
 }
-async function init() {
-  devices.value.push(...JSON.parse(await window.system.config.readDeviceConfig()))
-}
+// async function init() {
+//   devices.value.push(...JSON.parse(await window.system.config.readDeviceConfig()))
+// }
 const play = async (ip) => {
   pc.value = new RTCPeerConnection({
     iceServers: [] // 可加 STUN/TURN
@@ -91,6 +94,6 @@ defineExpose({
   stop
 })
 onMounted(async () => {
-  init()
+  // init()
 })
 </script>
