@@ -28,6 +28,9 @@ ipcMain.handle("data:exportToExcel", async (_event, json) => {
         "序列号": row.DeviceInfo?.serialNumber?.replace(row.DeviceInfo?.model, ''),
         "MAC地址": row.DeviceInfo?.macAddress,
         "设备类型": row.DeviceInfo?.deviceType,
+        "通道数量": row.InputProxyChannelStatusList?.length,
+        "平均回放天数": (row.trackDailyDistribution.map(track => track.dayList.day).flat(Infinity).filter(r => r.record).length / row.InputProxyChannelStatusList.length).toFixed(2) + "天",
+        "硬盘容量": row.hddList?.hdd?.map(h => (h.capacity / 1024).toFixed(2) + "GB").join(",")
     }));
     // 将数据转换为 worksheet 对象
     const worksheet = XLSX.utils.json_to_sheet(rows);

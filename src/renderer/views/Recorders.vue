@@ -14,11 +14,11 @@
     <v-virtual-scroll class="h-full w-full" :items="[1]">
       <template v-slot:default="{ item }">
         <div class="flex flex-row justify-center flex-wrap w-full h-full items-center">
-          <v-card v-for="device in channelStatusList" :title="devices.find(d => d.ip === device.sourceInputPortDescriptor.ipAddress)?.VideoInputChannel?.name" :subtitle="device.sourceInputPortDescriptor.ipAddress"
-            class="deviceCard !mx-3 !my-2 hover:scale-102" :color="getColor(device.chanDetectResult)" variant="tonal">
+          <v-card v-for="device in channelStatusList" :subtitle="`D${device.id} ${devices.find(d => d.ip === device.sourceInputPortDescriptor.ipAddress)?.VideoInputChannel?.name} ${device.sourceInputPortDescriptor.ipAddress} ${getText(device.chanDetectResult)}`"
+            class="deviceCard" :color="getColor(device.chanDetectResult)" variant="tonal">
             <v-card-item>
               <StreamPlayer :devices="devicesJson" :ref="el => setPlayerRef(el, device.sourceInputPortDescriptor.ipAddress)"
-                class="w-[360px] h-[202.5px]" />
+                class="w-[420px]" />
             </v-card-item>
             <v-card-actions>
               <v-btn @click="preview(device.sourceInputPortDescriptor.ipAddress)">
@@ -26,12 +26,6 @@
               </v-btn>
               <v-btn @click="stopPreview(device.sourceInputPortDescriptor.ipAddress)">
                 取消播放
-              </v-btn>
-              <v-btn>
-                D{{ device.id }}
-              </v-btn>
-              <v-btn>
-                {{ getText(device.chanDetectResult) }}
               </v-btn>
             </v-card-actions>
           </v-card>
@@ -184,10 +178,12 @@ async function init() {
 </script>
 <style>
 .deviceCard>.v-card-item {
-  padding: 5px 14px !important;
+  /* padding: 5px 14px !important; */
+  padding: 0px;
 }
 
 .deviceCard>.v-card-actions {
-  padding: 5px 8px !important;
+  /* padding: 5px 8px !important; */
+  padding: 0px;
 }
 </style>

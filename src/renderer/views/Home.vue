@@ -20,6 +20,15 @@
       <template v-slot:item.DeviceInfo.serialNumber="{ value, item }">
         {{ value.replace(item.DeviceInfo.model, '') }}
       </template>
+      <template v-slot:item.InputProxyChannelStatusList="{ value, item }">
+        {{ value.length }}
+      </template>
+      <template v-slot:item.hddList="{ value, item }">
+        {{ value.hdd?.map(h => (h.capacity / 1024).toFixed(2) + "GB").join(",") }}
+      </template>
+      <template v-slot:item.trackDailyDistribution="{ value, item }">
+        {{ (value.map(track => track.dayList.day).flat(Infinity).filter(r => r.record).length / item.InputProxyChannelStatusList.length).toFixed(2) + "天" }}
+      </template>
       <template v-slot:item.data-table-expand="{ internalItem, isExpanded, toggleExpand }">
         <v-btn :append-icon="isExpanded(internalItem) ? 'mdi-chevron-up' : 'mdi-chevron-down'"
           :text="isExpanded(internalItem) ? '收起' : '更多'" class="text-none" color="medium-emphasis" size="small"
@@ -29,6 +38,7 @@
         <tr class="text-center">
           <td :colspan="columns.length" class="py-2">
             <v-btn size="x-small" variant="tonal" @click="preview(item.ip)">预览</v-btn>
+            <!-- <v-btn size="x-small" variant="tonal" @click="previewVLC(item.ip)">VLC预览</v-btn> -->
             <v-btn size="x-small" variant="tonal" @click="stopPreview(item.ip)">停止预览</v-btn>
             <v-btn size="x-small" variant="tonal" @click="openSite(item.ip)">打开网页</v-btn>
             <v-btn size="x-small" variant="tonal" @click="syncTime(item.ip)">同步本机时间</v-btn>
@@ -217,6 +227,27 @@ const headers = ref([
     nowrap: true,
   },
   {
+    title: '通道数量',
+    key: 'InputProxyChannelStatusList',
+    sortable: true,
+    align: 'center',
+    nowrap: true,
+  },
+  {
+    title: '平均回放天数',
+    key: 'trackDailyDistribution',
+    sortable: true,
+    align: 'center',
+    nowrap: true,
+  },
+  {
+    title: '硬盘容量',
+    key: 'hddList',
+    sortable: true,
+    align: 'center',
+    nowrap: true,
+  },
+  {
     title: '设备ID',
     key: 'DeviceInfo.deviceID',
     sortable: true,
@@ -272,17 +303,60 @@ const ip = ref('172.30.0.0/24')
 // <!-- const ip = ref('172.30.8.0/24') -->
 // const ip = ref('172.30.0.245')
 // const ip = ref('192.168.1.64')
+// const ips = ref([
+//   '172.30.0.0/24',
+//   '172.30.1.0/24',
+//   '172.30.42.0/24',
+//   '172.30.24.0/24',
+//   '172.30.52.0/24',
+//   '172.30.90.0/24',
+//   '172.30.184.0/24',
+//   '172.30.185.0/24',
+//   '172.30.186.0/24',
+//   '172.30.187.0/24',
+// ])
 const ips = ref([
-  '172.30.0.0/24',
-  '172.30.1.0/24',
-  '172.30.42.0/24',
-  '172.30.24.0/24',
-  '172.30.52.0/24',
-  '172.30.90.0/24',
-  '172.30.184.0/24',
-  '172.30.185.0/24',
-  '172.30.186.0/24',
-  '172.30.187.0/24',
+  '172.30.0.202',
+  '172.30.0.201',
+  '172.30.0.203',
+  '172.30.0.205',
+  '172.30.0.204',
+  '172.30.0.206',
+  '172.30.0.190',
+  '172.30.0.191',
+  '172.30.1.249',
+  '172.30.1.250',
+  '172.30.1.252',
+  '172.30.52.2',
+  '172.30.1.15',
+  '172.30.1.16',
+  '172.30.1.17',
+  '172.30.1.248',
+  '172.30.1.210',
+  '172.30.42.251',
+  '172.30.42.252',
+  '172.30.42.253',
+  // '172.30.1.13',
+  '172.30.1.246',
+  '172.30.24.12',
+  '172.30.42.250',
+  '172.30.52.250',
+  '172.30.187.254',
+  '172.30.184.154',
+  '172.30.184.155',
+  '172.30.184.156',
+  '172.30.184.157',
+  '172.30.184.158',
+  '172.30.184.159',
+  '172.30.184.160',
+  '172.30.184.161',
+  '172.30.184.162',
+  '172.30.24.11',
+  '172.30.90.253',
+  '172.30.184.150',
+  '172.30.184.151',
+  '172.30.184.152',
+  '172.30.184.153',
 ])
 const loading = ref(false)
 const scanAll = async () => {
@@ -359,6 +433,9 @@ const exportToExcel = () => {
   window.system.data.exportToExcel(JSON.stringify(devices.value))
 }
 const preview = async (ip) => {
+  players[ip].start(ip)
+}
+const previewVLC = async (ip) => {
   players[ip].start(ip)
 }
 const stopPreview = (ip) => {

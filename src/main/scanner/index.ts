@@ -21,5 +21,7 @@ export async function scanAll(ips) {
       resultIps.push(...parseRange(ips[i]))
     }
   }
-  batchCreateDevices(ipv4Regex.test(ips) ? [ips] : parseRange(ips))
+  // batchCreateDevices(ipv4Regex.test(ips) ? [ips] : parseRange(ips))
+  console.log('resultIps', resultIps)
+  batchCreateDevices(resultIps)
 }
