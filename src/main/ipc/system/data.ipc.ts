@@ -29,6 +29,13 @@ ipcMain.handle("data:exportToExcel", async (_event, json) => {
             return ""
         }
     }
+    const getAveragePlaybackDays = (row) => {
+        try {
+            return (row.trackDailyDistribution.map(track => track.dayList.day).flat(Infinity).filter(r => r.record).length / row.InputProxyChannelStatusList.length).toFixed(2) + "天"
+        } catch (err) {
+            return ""
+        }
+    }
     const rows = data.map(row => ({
         "IP": row.ip,
         "用户名": row.username,
@@ -42,7 +49,7 @@ ipcMain.handle("data:exportToExcel", async (_event, json) => {
         "MAC地址": row.DeviceInfo?.macAddress,
         "设备类型": row.DeviceInfo?.deviceType,
         "通道数量": row.InputProxyChannelStatusList?.length,
-        "平均回放天数": (row.trackDailyDistribution.map(track => track.dayList.day).flat(Infinity).filter(r => r.record).length / row.InputProxyChannelStatusList.length).toFixed(2) + "天",
+        "平均回放天数": getAveragePlaybackDays(row),
         "硬盘容量": row.hddList?.hdd?.map(h => (h.capacity / 1024).toFixed(2) + "GB" + getHddStatus(h)).join(",")
     }));
     // 将数据转换为 worksheet 对象
