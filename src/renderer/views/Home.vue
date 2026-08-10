@@ -4,6 +4,8 @@
       <v-text-field class="w-[50%]" label="ip" v-model="ip" hide-details density="compact" clearable></v-text-field>
       <v-btn variant="tonal" :loading="loading" @click="scan">发现设备</v-btn>
       <v-btn variant="tonal" :loading="loading" @click="scanAll">扫描双十</v-btn>
+      <v-btn variant="tonal" :loading="loading" @click="scanWithoutClean">不清空扫描</v-btn>
+      <v-btn variant="tonal" :loading="loading" @click="scanAllWithoutClean">不清空扫描全部</v-btn>
       <v-btn variant="tonal" @click="syncAllDeviceNames">同步所有设备名称为通道名称</v-btn>
       <v-btn variant="tonal" @click="syncAllDeviceTimes">同步所有设备时间</v-btn>
       <v-btn variant="tonal" @click="exportToExcel">导出excel</v-btn>
@@ -18,16 +20,16 @@
         <v-skeleton-loader type="table-row@10"></v-skeleton-loader>
       </template>
       <template v-slot:item.DeviceInfo.serialNumber="{ value, item }">
-        {{ value.replace(item.DeviceInfo.model, '') }}
+        {{ value?.replace(item.DeviceInfo.model, '') }}
       </template>
       <template v-slot:item.InputProxyChannelStatusList="{ value, item }">
-        {{ value.length }}
+        {{ value?.length }}
       </template>
       <template v-slot:item.hddList="{ value, item }">
-        {{ value.hdd?.map(h => (h.capacity / 1024).toFixed(2) + "GB").join(",") }}
+        {{ value?.hdd?.map(h => (h.capacity / 1024).toFixed(2) + "GB" + getHddStatus(h)).join(",") }}
       </template>
       <template v-slot:item.trackDailyDistribution="{ value, item }">
-        {{ (value.map(track => track.dayList.day).flat(Infinity).filter(r => r.record).length / item.InputProxyChannelStatusList.length).toFixed(2) + "天" }}
+        {{ getAveragePlaybackDays(value, item) }}
       </template>
       <template v-slot:item.data-table-expand="{ internalItem, isExpanded, toggleExpand }">
         <v-btn :append-icon="isExpanded(internalItem) ? 'mdi-chevron-up' : 'mdi-chevron-down'"
@@ -125,6 +127,7 @@ import StreamPlayer from '../components/StreamPlayer.vue'
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';        // 引入 UTC 插件
 import timezone from 'dayjs/plugin/timezone'; // 引入时区插件
+import { parseRange } from '@network-utils/ip-range'
 
 // 注册插件（这一步不能少！）
 dayjs.extend(utc);
@@ -336,7 +339,7 @@ const ips = ref([
   '172.30.42.251',
   '172.30.42.252',
   '172.30.42.253',
-  // '172.30.1.13',
+  '172.30.1.13',
   '172.30.1.246',
   '172.30.24.12',
   '172.30.42.250',
@@ -359,16 +362,24 @@ const ips = ref([
   '172.30.184.153',
 ])
 const loading = ref(false)
-const scanAll = async () => {
+const getHddStatus = (hdd) => {
+  if (hdd.status === "notexist") {
+    return "(不存在)"
+  } else if(hdd.status === "unformatted") {
+    return "(未格式化)"
+  } else if (hdd.status === "error") {
+    return "(出错)"
+  } else if (hdd.status === "idle") {
+    return "(休眠)"
+  } else {
+    return ""
+  }
+}
+const getAveragePlaybackDays = () => {
   try {
-    devices.value.length = 0
-    loading.value = true
-    log.info('开始扫描设备：', ips.value)
-    await window.system.scan.scanAll([...ips.value])
-    loading.value = false
+    return (value?.map(track => track.dayList.day).flat(Infinity).filter(r => r.record).length / item?.InputProxyChannelStatusList?.length).toFixed(2) + "天"
   } catch (err) {
-    log.error('扫描设备失败', err)
-    loading.value = false
+    return ""
   }
 }
 const scan = async () => {
@@ -381,6 +392,38 @@ const scan = async () => {
   } catch (err) {
     log.error('扫描设备失败', err)
     loading.value = false
+  }
+}
+const scanAll = async () => {
+  try {
+    devices.value.length = 0
+    loading.value = true
+    log.info('开始扫描设备：', ips.value)
+    await window.system.scan.scanAll([...ips.value])
+    loading.value = false
+  } catch (err) {
+    log.error('扫描设备失败', err)
+    loading.value = false
+  }
+}
+const scanWithoutClean = async () => {
+  try {
+    const ipv4Regex = /^(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)){3}$/;
+    const ips = ipv4Regex.test(ip.value) ? [ip.value] : parseRange(ip.value)
+    let remainIps = ips.filter(ip => !devices.value.find(device => device.ip === ip))
+    log.info('开始扫描设备：', remainIps)
+    await window.system.scan.scanAll([...remainIps])
+  } catch (err) {
+    log.error('扫描设备失败', err)
+  }
+}
+const scanAllWithoutClean = async () => {
+  try {
+    let remainIps = ips.value.filter(ip => !devices.value.find(device => device.ip === ip))
+    log.info('开始扫描设备：', remainIps)
+    await window.system.scan.scanAll([...remainIps])
+  } catch (err) {
+    log.error('扫描设备失败', err)
   }
 }
 const syncAllDeviceTimes = async () => {

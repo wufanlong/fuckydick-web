@@ -16,6 +16,19 @@ if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
 }
 ipcMain.handle("data:exportToExcel", async (_event, json) => {
     const data = JSON.parse(json);
+    const getHddStatus = (hdd) => {
+        if (hdd.status === "notexist") {
+            return "(不存在)"
+        } else if(hdd.status === "unformatted") {
+            return "(未格式化)"
+        } else if (hdd.status === "error") {
+            return "(出错)"
+        } else if (hdd.status === "idle") {
+            return "(休眠)"
+        } else {
+            return ""
+        }
+    }
     const rows = data.map(row => ({
         "IP": row.ip,
         "用户名": row.username,
@@ -30,7 +43,7 @@ ipcMain.handle("data:exportToExcel", async (_event, json) => {
         "设备类型": row.DeviceInfo?.deviceType,
         "通道数量": row.InputProxyChannelStatusList?.length,
         "平均回放天数": (row.trackDailyDistribution.map(track => track.dayList.day).flat(Infinity).filter(r => r.record).length / row.InputProxyChannelStatusList.length).toFixed(2) + "天",
-        "硬盘容量": row.hddList?.hdd?.map(h => (h.capacity / 1024).toFixed(2) + "GB").join(",")
+        "硬盘容量": row.hddList?.hdd?.map(h => (h.capacity / 1024).toFixed(2) + "GB" + getHddStatus(h)).join(",")
     }));
     // 将数据转换为 worksheet 对象
     const worksheet = XLSX.utils.json_to_sheet(rows);
