@@ -30,21 +30,14 @@ const pull = async (ip, url) => {
     url = url.replace("password", password)
     stream = ip + url.match(/\/Streaming\/tracks\/(\d+)\//)[1]
   }
-  console.log("pull url:", url)
   const response = await fetch(`http://127.0.0.1/index/api/addStreamProxy?app=${app}&stream=${stream}&type=play&secret=aev5nuiInWrzIEKJMJc5suXzE6nhIdgI&vhost=__defaultVhost__&url=${url}`)
   const ret = await response.json()
-
-  console.log("addStreamProxy:", ret)
 
   if (ret.code !== 0) {
     throw new Error(ret.msg || "添加拉流失败")
   }
-
   // ★ 保存 ZLM 返回的 key
   proxyKey.value = ret.data?.key
-
-  console.log("proxyKey:", proxyKey.value)
-
   return {
     stream,
     key: proxyKey.value
@@ -132,9 +125,7 @@ const stop = async (ip) => {
         `&key=${encodeURIComponent(proxyKey.value)}`
 
       const response = await fetch(url)
-      const ret = await response.json()
 
-      console.log("delStreamProxy:", ret)
     } catch (e) {
       console.error("删除 ZLM Proxy 失败:", e)
     }

@@ -172,7 +172,6 @@ watch(channelStatusList.value, newVal => {
   Object.keys(playbackMap).forEach(channelId => {
     delete playbackMap[channelId]
   })
-  console.log("playbackMap:", playbackMap)
   // 创建离线摄像机设备
   for (let i = 0; i < newVal.length; i++) {
     if (!newVal[i].online) {
@@ -248,13 +247,10 @@ const initPlayback = async (channelId) => {
   let trackDailyDistribution;
   let isPlaybackFileExist = false
   for (let j = 5; j > 0; j--) {
-    console.log("data:", data)
-    console.log(j)
     trackDailyDistribution = await window.api.common.call(currentRecorder.ip, 'postRecordTracksDailyDistributionByID', {
       id: channelId + "01",
       data: data
     })
-    console.log('trackDailyDistribution:', trackDailyDistribution)
     const day = trackDailyDistribution.dayList.day.find(d => d.record)
     if (day) {
       Object.assign(trackDailyDistribution, {
@@ -279,47 +275,33 @@ const initPlayback = async (channelId) => {
     return
   } else {
     const day = trackDailyDistribution.dayList.day.findLast(d => d.record)
-    console.log("day:", day)
     const {
       year,
       monthOfYear,
     } = trackDailyDistribution
-
     const dayOfMonth = day.dayOfMonth
-    console.log("year:", year, "monthOfYear:", monthOfYear, "dayOfMonth:", dayOfMonth)
-
     // 注意：JS Date 的月份从 0 开始，所以要 -1
     const date = new Date(
       Date.UTC(year, monthOfYear - 1, dayOfMonth)
     )
-
     // 前一天
     const startDate = new Date(date)
     startDate.setUTCDate(startDate.getUTCDate() - 1)
-
     // 后一天
     const endDate = new Date(date)
     endDate.setUTCDate(endDate.getUTCDate() + 1)
-
     // 格式化为 YYYY-MM-DDTHH:mm:ssZ
     const formatDate = (date, endOfDay = false) => {
       const year = date.getUTCFullYear()
       const month = String(date.getUTCMonth() + 1).padStart(2, '0')
       const day = String(date.getUTCDate()).padStart(2, '0')
-
       if (endOfDay) {
         return `${year}-${month}-${day}T23:59:59Z`
       }
-
       return `${year}-${month}-${day}T00:00:00Z`
     }
-
     const startTime = formatDate(startDate)
     const endTime = formatDate(endDate, true)
-
-    console.log('startTime:', startTime)
-    console.log('endTime:', endTime)
-
     window.api.common.call(
       currentRecorder.ip,
       'postSearch',
@@ -341,7 +323,6 @@ const initPlayback = async (channelId) => {
         }
       }
     ).then(res => {
-      console.log(res)
       res.timeList = []
       for (let i = 0; i < res.matchList.searchMatchItem.length; i++) {
         res.timeList.push({
@@ -350,20 +331,16 @@ const initPlayback = async (channelId) => {
         })
       }
       playbackMap[channelId] = res
-      console.log("playbackMap:", playbackMap)
     }).catch(err => {
       log.error(err)
     })
   }
 }
 const playback = (channel) => {
-  console.log("index:", playbackMap[channel.id].index)
   let url = playbackMap[channel.id].matchList.searchMatchItem[playbackMap[channel.id].index].mediaSegmentDescriptor.playbackURI
   const recorderIp = recorders.value.find(r => r.id === tab.value).ip
   const ip = channel.sourceInputPortDescriptor.ipAddress
   let playbackUrl = url.replace("rtsp://" + recorderIp, "rtsp://admin:password@" + recorderIp + ":554")
-  console.log("playbackUrl:", playbackUrl)
-  console.log("channel", channel)
   players[ip].playback(recorderIp, playbackUrl)
 }
 const stopPreview = (ip) => {
