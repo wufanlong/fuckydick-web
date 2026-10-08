@@ -14,9 +14,6 @@ export function updateDevicesJson(newConfig: Array<{ id: number, deviceName: str
 }
 init();
 export function createDevice(ip: string, password="sszx123456") {
-  if (ip.startsWith("172.30.24.")) {
-    password = "abc123456";
-  }
   password = devicesJson.find(device => device.ip === ip.substring(0, ip.lastIndexOf(".")) + ".0/24")?.password || password
   password = devicesJson.find(device => device.ip === ip)?.password || password
   const sdk = new isapiSDK(ip, "admin", password);

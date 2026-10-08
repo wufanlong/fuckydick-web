@@ -3,7 +3,7 @@ import { getSDKByIP } from "../../device/factory/index.ts";
 import { isapiSDK } from "isapi-js-sdk";
 import log from "electron-log";
 
-ipcMain.handle("common:call", (_event, ip, fName, data) => {
+ipcMain.handle("common:call", async (_event, ip, fName, data) => {
     const sdk: isapiSDK = getSDKByIP(ip)
     if (fName === 'putDeviceInfo') {
         return sdk.putDeviceInfo(data)
@@ -23,6 +23,12 @@ ipcMain.handle("common:call", (_event, ip, fName, data) => {
         return sdk.putNetworkByID(undefined, data)
     } else if (fName === 'getChannelStatusList') {
         return sdk.getChannelStatusList()
+    } else if (fName === 'getChannelsList') {
+        return sdk.getChannelsList()
+    } else if (fName === 'postRecordTracksDailyDistributionByID') {
+        return sdk.postRecordTracksDailyDistributionByID(data.id, data.data)
+    } else if (fName === 'postSearch') {
+        return sdk.postSearch(data)
     } else if (fName === 'getTime') {
         return sdk.getTime()
     } else if (fName === 'putTime') {

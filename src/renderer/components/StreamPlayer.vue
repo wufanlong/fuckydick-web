@@ -16,18 +16,48 @@ const props = defineProps({
 })
 const app = 'live'  // ZLM 默认应用名
 const pc = ref(null)
-const pull = async (ip) => {
+const proxyKey = ref(null)
+const pull = async (ip, url) => {
   let password = "sszx123456"
   password = props.devices.find(device => device.ip === ip.substring(0, ip.lastIndexOf(".")) + ".0/24")?.password || password
   password = props.devices.find(device => device.ip === ip)?.password || password
-  const url = `rtsp://admin:${password}@${ip}:554/Streaming/Channels/101`
-  const response = await fetch(`http://127.0.0.1/index/api/addStreamProxy?app=${app}&stream=${ip}&type=play&secret=aev5nuiInWrzIEKJMJc5suXzE6nhIdgI&vhost=__defaultVhost__&url=${url}`)
-  return response
+  // 回放url示例
+  // rtsp://admin:sszx123456@172.30.1.250:554/Streaming/tracks/2001/?starttime=20260917T015207Z&endtime=20260917T031157Z&name=00010000762000000&size=1064144700
+  let stream = ip
+  if (!url) {
+    url = `rtsp://admin:${password}@${ip}:554/Streaming/Channels/101`
+  } else {
+    url = url.replace("password", password)
+    stream = ip + url.match(/\/Streaming\/tracks\/(\d+)\//)[1]
+  }
+  console.log("pull url:", url)
+  const response = await fetch(`http://127.0.0.1/index/api/addStreamProxy?app=${app}&stream=${stream}&type=play&secret=aev5nuiInWrzIEKJMJc5suXzE6nhIdgI&vhost=__defaultVhost__&url=${url}`)
+  const ret = await response.json()
+
+  console.log("addStreamProxy:", ret)
+
+  if (ret.code !== 0) {
+    throw new Error(ret.msg || "添加拉流失败")
+  }
+
+  // ★ 保存 ZLM 返回的 key
+  proxyKey.value = ret.data?.key
+
+  console.log("proxyKey:", proxyKey.value)
+
+  return {
+    stream,
+    key: proxyKey.value
+  }
 }
 // async function init() {
 //   devices.value.push(...JSON.parse(await window.system.config.readDeviceConfig()))
 // }
-const play = async (ip) => {
+const play = async (ip, url) => {
+  let stream = ip
+  if (url) {
+    stream = ip + url.match(/\/Streaming\/tracks\/(\d+)\//)[1]
+  }
   pc.value = new RTCPeerConnection({
     iceServers: [] // 可加 STUN/TURN
   })
@@ -39,7 +69,7 @@ const play = async (ip) => {
   pc.value.addTransceiver('audio', { direction: 'recvonly' })
   pc.value.createOffer().then((desc) => {
     pc.value.setLocalDescription(desc).then(() => {
-      fetch(`http://127.0.0.1/index/api/webrtc?app=${app}&stream=${ip}&type=play`, {
+      fetch(`http://127.0.0.1/index/api/webrtc?app=${app}&stream=${stream}&type=play`, {
         method: 'POST',
         headers: {
           'Content-Type': 'text/plain;charset=utf-8'
@@ -71,26 +101,50 @@ const start = async (ip) => {
   await pull(ip)
   play(ip)
 }
-const stop = (ip) => {
-  // 1. 停止所有 track
+const playback = async (ip, url) => {
+  stop(ip)
+  await pull(ip, url)
+  play(ip, url)
+}
+const stop = async (ip) => {
+  // 1. 停止 video
   if (videoEl.value?.srcObject) {
-    videoEl.value.srcObject.getTracks().forEach(track => {
-      track.stop();
-    });
-    videoEl.value.srcObject = null;
+    videoEl.value.srcObject
+      .getTracks()
+      .forEach(track => track.stop())
+
+    videoEl.value.srcObject = null
   }
-  
-  // 2. 关闭 PeerConnection
+
+  // 2. 关闭 WebRTC
   if (pc.value) {
-    pc.value.ontrack = null;
-    pc.value.close();
-    pc.value = null;
+    pc.value.ontrack = null
+    pc.value.close()
+    pc.value = null
   }
-  
-  // log.info(ip, '已停止播放');
+
+  // 3. ★ 删除 ZLMediaKit 拉流代理
+  if (proxyKey.value) {
+    try {
+      const url =
+        `http://127.0.0.1/index/api/delStreamProxy` +
+        `?secret=aev5nuiInWrzIEKJMJc5suXzE6nhIdgI` +
+        `&key=${encodeURIComponent(proxyKey.value)}`
+
+      const response = await fetch(url)
+      const ret = await response.json()
+
+      console.log("delStreamProxy:", ret)
+    } catch (e) {
+      console.error("删除 ZLM Proxy 失败:", e)
+    }
+
+    proxyKey.value = null
+  }
 }
 defineExpose({
   start,
+  playback,
   stop
 })
 onMounted(async () => {
