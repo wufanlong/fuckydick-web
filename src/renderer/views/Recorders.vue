@@ -14,7 +14,7 @@
         ></v-chip>
       </v-chip-group>
     </v-sheet>
-    <v-tabs color="deep-purple-accent-4" align-tabs="center" stacked v-model="tab" center-active @click="clickTab()">
+    <v-tabs color="deep-purple-accent-4" align-tabs="center" class="mb-1" stacked v-model="tab" center-active @click="clickTab">
       <v-tab v-for="recorder in recorders.filter(r => r.place === tags[chipValue])" :key="recorder.id" :value="recorder.id">
         <v-badge floating  location="top right" :offset-x="5" color="error" :content="recorder.offlineCount" :model-value="recorder.offlineCount !== 0">
           <div class="flex flex-col justify-center align-center">
@@ -25,20 +25,20 @@
         </v-badge>
       </v-tab>
     </v-tabs>
-    <v-virtual-scroll class="h-full w-full" :items="[1]">
+    <v-virtual-scroll class="h-full w-full pt-1 pb-3" :items="[1]">
       <template v-slot:default="{ item }">
         <div class="flex flex-row justify-center flex-wrap w-full h-full items-center">
-          <v-card v-for="device in channelStatusList" :subtitle="`D${device.id} ${channelList.find(c => c.id === device.id)?.name || ''} ${device.sourceInputPortDescriptor.ipAddress} ${getText(device.chanDetectResult)}`"
+          <v-card v-for="device in channelStatusList" :key="device.sourceInputPortDescriptor.ipAddress" :subtitle="`D${device.id} ${channelList.find(c => c.id === device.id)?.name || ''} ${device.sourceInputPortDescriptor.ipAddress} ${getText(device.chanDetectResult)}`"
             class="deviceCard" :color="getColor(device.chanDetectResult)" variant="tonal">
             <v-card-item>
-              <StreamPlayer :devices="devicesJson" :ref="el => setPlayerRef(el, device.sourceInputPortDescriptor.ipAddress)"
+              <StreamPlayer v-if="device.isPlay" :devices="devicesJson" :ref="el => setPlayerRef(el, device.sourceInputPortDescriptor.ipAddress)"
                 class="w-[420px]" />
             </v-card-item>
             <v-card-actions>
-              <v-btn v-if="device.online" @click="preview(device.sourceInputPortDescriptor.ipAddress)">
+              <v-btn v-if="device.online" @click="preview(device)">
                 播放
               </v-btn>
-              <v-btn v-else @click="initPlayback(device.id)">
+              <v-btn v-else @click="device.isPlay=true;initPlayback(device.id)">
                 查看回放
               </v-btn>
               <v-select density="compact" :width="100" v-if="playbackMap[device.id]"
@@ -46,7 +46,7 @@
                 @update:modelValue="playback(device)"
                 :items="playbackMap[device.id]?.timeList"
               ></v-select>
-              <v-btn @click="stopPreview(device.sourceInputPortDescriptor.ipAddress)">
+              <v-btn @click="stopPreview(device)">
                 取消播放
               </v-btn>
             </v-card-actions>
@@ -98,7 +98,6 @@ const handleChipValueChange = (newValue) => {
     window.device.createIsapiSDKInstance(filteredRecorders[i].ip, filteredRecorders[i].password)
   }
   tab.value = filteredRecorders[0]?.id || 0
-  clickTab()
 }
 onMounted(() => {
   init()
@@ -112,14 +111,8 @@ onMounted(() => {
     const recorder = recorders.value.find(recorder => recorder.ip === device.ip)
     const currentRecorder = recorders.value.find(r => r.id === tab.value)
     if (recorder) {
-      const deviceName = device.DeviceInfo?.deviceName
-      if (deviceName) {
-        if (recorder.deviceName !== deviceName) {
-          recorder.deviceName = deviceName
-          saveRecorders()
-        }
-        recorder.deviceName = deviceName
-      }
+      recorder.deviceName = device.DeviceInfo?.deviceName
+      // 获取通道在线状态
       window.api.common.call(device.ip, 'getChannelStatusList').then(res => {
         Object.assign(recorders.value.find(recorder => recorder.ip === device.ip), {
           ...recorder,
@@ -133,6 +126,7 @@ onMounted(() => {
       }).catch(err => {
         log.error(err)
       })
+      // 获取通道列表
       window.api.common.call(device.ip, 'getChannelsList').then(res => {
         Object.assign(recorders.value.find(recorder => recorder.ip === device.ip), {
           ...recorder,
@@ -155,20 +149,7 @@ onUnmounted(() => {
   removeDeviceUpdatedListener?.()
   removeDeviceInitFailedListener?.()
 })
-watch(recorders.value, newVal => {
-  tab.value = newVal[0].id
-  let filteredDevices = devices.value.filter(d => newVal.find(r => r.ip === d.ip))
-  if (recorders.value.length === filteredDevices.length) {
-    saveRecorders()
-  }
-})
-watch(channelStatusList.value, newVal => {
-  for (const ip in players) {
-    if (!newVal.find(device => device.sourceInputPortDescriptor.ipAddress === ip)) {
-      stopPreview(ip)
-      delete players[ip]
-    }
-  }
+watch(channelStatusList.value, (newVal, oldVal) => {
   Object.keys(playbackMap).forEach(channelId => {
     delete playbackMap[channelId]
   })
@@ -185,24 +166,17 @@ const saveRecorders = () => {
     let obj = {}
     Object.assign(obj, recorders.value[i])
     delete obj.channelStatusList
+    delete obj.channelList
     delete obj.offlineCount
     arr.push(obj)
   }
-  
   window.system.config.writeRecorderConfig(JSON.stringify(arr))
 }
-const clickTab = async () => {
+const clickTab = (e) => {
   stopPreviewAll()
   const currentRecorder = recorders.value.find(r => r.id === tab.value)
-  const timer = setInterval(async () => {
-    channelStatusList.value.length = 0;
-    channelList.value.length = 0;
-    if (currentRecorder.channelStatusList && currentRecorder.channelList) {
-      channelStatusList.value.push(...currentRecorder.channelStatusList)
-      channelList.value.push(...currentRecorder.channelList)
-      clearInterval(timer)
-    }
-  }, 125)
+  window.device.createIsapiSDKInstance(currentRecorder.ip, currentRecorder.password)
+  saveRecorders()
 }
 const getColor = (result) => {
   return colors[result] || "deep-orange"
@@ -217,20 +191,31 @@ const setPlayerRef = (el, ip) => {
     delete players[ip]
   }
 }
-const previewAll = async () => {
+const previewAll = () => {
   for (let i = 0; i < channelStatusList.value.length; i++) {
     const device = channelStatusList.value[i]
-    players[device.sourceInputPortDescriptor.ipAddress].start(device.sourceInputPortDescriptor.ipAddress)
+    preview(device)
   }
 }
-const stopPreviewAll = async () => {
-  for (let i = 0; i < channelStatusList.value.length; i++) {
-    const device = channelStatusList.value[i]
-    players[device.sourceInputPortDescriptor.ipAddress].stop(device.sourceInputPortDescriptor.ipAddress)
-  }
+const stopPreviewAll = () => {
+  Object.keys(players).forEach(ip => {
+    players[ip].stop(ip)
+  })
 }
-const preview = async (ip) => {
-  players[ip].start(ip)
+const preview = async (device) => {
+  device.isPlay = true
+  const ip = device.sourceInputPortDescriptor.ipAddress
+  const timer = setInterval(() => {
+    if (players[ip]) {
+      players[ip].start(ip)
+      clearInterval(timer)
+    }
+  }, 125)
+}
+const stopPreview = (device) => {
+  device.isPlay = false
+  const ip = device.sourceInputPortDescriptor.ipAddress
+  players[ip].stop(ip)
 }
 const initPlayback = async (channelId) => {
   const currentRecorder = recorders.value.find(r => r.id === tab.value)
@@ -343,9 +328,6 @@ const playback = (channel) => {
   let playbackUrl = url.replace("rtsp://" + recorderIp, "rtsp://admin:password@" + recorderIp + ":554")
   players[ip].playback(recorderIp, playbackUrl)
 }
-const stopPreview = (ip) => {
-  players[ip].stop(ip)
-}
 async function init() {
   recorders.value.push(...JSON.parse(await window.system.config.readRecorderConfig()))
   devicesJson.value.push(...JSON.parse(await window.system.config.readDeviceConfig()))
@@ -354,10 +336,9 @@ async function init() {
     window.device.createIsapiSDKInstance(filteredRecorders[i].ip, filteredRecorders[i].password)
   }
   tab.value = filteredRecorders[0]?.id || 0
-  clickTab()
 }
 </script>
-<style>
+<style scoped>
 .deviceCard>.v-card-item {
   /* padding: 5px 14px !important; */
   padding: 0px;
@@ -366,5 +347,11 @@ async function init() {
 .deviceCard>.v-card-actions {
   /* padding: 5px 8px !important; */
   padding: 0px;
+}
+.v-tabs {
+  height: 57px !important;
+}
+.v-tabs--density-default.v-tabs--stacked {
+  --v-tabs-height: 57px !important;
 }
 </style>

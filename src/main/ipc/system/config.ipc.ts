@@ -17,7 +17,8 @@ ipcMain.handle("config:readRecorderConfig", async (_event) => {
     return jsonfile.readFile(recordersPath);
 });
 ipcMain.handle("config:writeRecorderConfig", async (_event, config) => {
-    log.info("写入录像机配置", config)
+    log.info("写入录像机配置")
+    // log.info("写入录像机配置", config)
     return jsonfile.writeFile(recordersPath, config);
 });
 
