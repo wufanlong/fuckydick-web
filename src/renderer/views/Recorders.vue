@@ -15,7 +15,7 @@
       </v-chip-group>
     </v-sheet>
     <v-tabs color="deep-purple-accent-4" align-tabs="center" class="mb-1" stacked v-model="tab" center-active @click="clickTab">
-      <v-tab v-for="recorder in recorders.filter(r => r.place === tags[chipValue])" :key="recorder.id" :value="recorder.id">
+      <v-tab v-for="recorder in filteredRecorders" :key="recorder.id" :value="recorder.id">
         <v-badge floating  location="top right" :offset-x="5" color="error" :content="recorder.offlineCount" :model-value="recorder.offlineCount !== 0">
           <div class="flex flex-col justify-center align-center">
             <div>{{ recorder.deviceName }}</div>
@@ -49,6 +49,9 @@
               <v-btn @click="stopPreview(device)">
                 取消播放
               </v-btn>
+              <v-btn @click="look(device)">
+                查看详情
+              </v-btn>
             </v-card-actions>
           </v-card>
         </div>
@@ -65,6 +68,8 @@ import StreamPlayer from '../components/StreamPlayer.vue'
 import log from 'electron-log/renderer'
 
 const recorders = ref([])
+const filteredRecorders = computed(() => recorders.value.filter(r => r.place === tags.value[chipValue.value]))
+const currentRecorder = computed(() => recorders.value.find(r => r.id === tab.value))
 const colors = reactive({
   "netUnreachable": "red",
   "connect": "indigo",
@@ -84,20 +89,17 @@ const playbackMap = reactive({})
 let removeDeviceUpdatedListener: (() => void) | undefined
 let removeDeviceInitFailedListener: (() => void) | undefined
 const chipValue = ref(0)
-const tags = [
-  '双十一期',
-  '双十二期',
-  '双十三期',
-  '双十四期',
-  '京口',
-  '总园'
-]
+const tags = computed(() => Array.from(new Set(recorders.value.map(r => r.place))))
+
 const handleChipValueChange = (newValue) => {
-  const filteredRecorders = recorders.value.filter(r => r.place === tags[newValue])
-  for (let i = 0; i < filteredRecorders.length; i++) {
-    window.device.createIsapiSDKInstance(filteredRecorders[i].ip, filteredRecorders[i].password)
+  tab.value = filteredRecorders.value[0]?.id || 0
+  look()
+  for (let i = 0; i < filteredRecorders.value.length; i++) {
+    window.device.createIsapiSDKInstance(filteredRecorders.value[i].ip, filteredRecorders.value[i].password)
   }
-  tab.value = filteredRecorders[0]?.id || 0
+}
+const look  = () => {
+    console.log(currentRecorder.value.deviceName, currentRecorder.value.ip)
 }
 onMounted(() => {
   init()
@@ -109,7 +111,7 @@ onMounted(() => {
       Object.assign(d, device)
     }
     const recorder = recorders.value.find(recorder => recorder.ip === device.ip)
-    const currentRecorder = recorders.value.find(r => r.id === tab.value)
+    console.log(currentRecorder.value.deviceName, currentRecorder.value.ip, device.DeviceInfo?.deviceName, device.ip)
     if (recorder) {
       recorder.deviceName = device.DeviceInfo?.deviceName
       // 获取通道在线状态
@@ -119,7 +121,7 @@ onMounted(() => {
           "offlineCount": res.filter(channelStatus => !channelStatus.online).length,
           "channelStatusList": res
         })
-        if (currentRecorder.ip === device.ip) {
+        if (currentRecorder.value.ip === device.ip) {
           channelStatusList.value.length = 0;
           channelStatusList.value.push(...res)
         }
@@ -132,7 +134,7 @@ onMounted(() => {
           ...recorder,
           "channelList": res
         })
-        if (currentRecorder.ip === device.ip) {
+        if (currentRecorder.value.ip === device.ip) {
           channelList.value.length = 0;
           channelList.value.push(...res)
         }
@@ -174,8 +176,7 @@ const saveRecorders = () => {
 }
 const clickTab = (e) => {
   stopPreviewAll()
-  const currentRecorder = recorders.value.find(r => r.id === tab.value)
-  window.device.createIsapiSDKInstance(currentRecorder.ip, currentRecorder.password)
+  window.device.createIsapiSDKInstance(currentRecorder.value.ip, currentRecorder.value.password)
   saveRecorders()
 }
 const getColor = (result) => {
@@ -218,7 +219,6 @@ const stopPreview = (device) => {
   players[ip].stop(ip)
 }
 const initPlayback = async (channelId) => {
-  const currentRecorder = recorders.value.find(r => r.id === tab.value)
   // 离线监控回放
   const currentDate = new Date();
   let nowYear = currentDate.getFullYear();
@@ -232,7 +232,7 @@ const initPlayback = async (channelId) => {
   let trackDailyDistribution;
   let isPlaybackFileExist = false
   for (let j = 5; j > 0; j--) {
-    trackDailyDistribution = await window.api.common.call(currentRecorder.ip, 'postRecordTracksDailyDistributionByID', {
+    trackDailyDistribution = await window.api.common.call(currentRecorder.value.ip, 'postRecordTracksDailyDistributionByID', {
       id: channelId + "01",
       data: data
     })
@@ -288,7 +288,7 @@ const initPlayback = async (channelId) => {
     const startTime = formatDate(startDate)
     const endTime = formatDate(endDate, true)
     window.api.common.call(
-      currentRecorder.ip,
+      currentRecorder.value.ip,
       'postSearch',
       {
         searchID: "CBD83726-CF20-0001-A4A4-14601D301E55",
@@ -323,7 +323,7 @@ const initPlayback = async (channelId) => {
 }
 const playback = (channel) => {
   let url = playbackMap[channel.id].matchList.searchMatchItem[playbackMap[channel.id].index].mediaSegmentDescriptor.playbackURI
-  const recorderIp = recorders.value.find(r => r.id === tab.value).ip
+  const recorderIp = currentRecorder.value.ip
   const ip = channel.sourceInputPortDescriptor.ipAddress
   let playbackUrl = url.replace("rtsp://" + recorderIp, "rtsp://admin:password@" + recorderIp + ":554")
   players[ip].playback(recorderIp, playbackUrl)
@@ -331,11 +331,10 @@ const playback = (channel) => {
 async function init() {
   recorders.value.push(...JSON.parse(await window.system.config.readRecorderConfig()))
   devicesJson.value.push(...JSON.parse(await window.system.config.readDeviceConfig()))
-  const filteredRecorders = recorders.value.filter(r => r.place === tags[chipValue.value])
-  for (let i = 0; i < filteredRecorders.length; i++) {
-    window.device.createIsapiSDKInstance(filteredRecorders[i].ip, filteredRecorders[i].password)
+  for (let i = 0; i < filteredRecorders.value.length; i++) {
+    window.device.createIsapiSDKInstance(filteredRecorders.value[i].ip, filteredRecorders.value[i].password)
   }
-  tab.value = filteredRecorders[0]?.id || 0
+  tab.value = filteredRecorders.value[0]?.id || 0
 }
 </script>
 <style scoped>

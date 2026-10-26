@@ -1,6 +1,6 @@
 <template>
   <v-sheet border rounded>
-    <v-data-table items-per-page="30" :search="search" items-per-page-text="" hover striped="even" :headers="headers" density="compact" multi-sort
+    <v-data-table items-per-page="30" :search="search" :custom-filter="filterText" items-per-page-text="" hover striped="even" :headers="headers" density="compact" multi-sort
       :hide-default-footer="devices.length < 11" :items="devices">
       <template v-slot:top>
         <v-toolbar flat>
@@ -8,6 +8,8 @@
             设备管理
           </v-toolbar-title>
           
+          <v-select class="mr-4 mt-5" density="compact" max-width="344" clearable label="请选择位置" v-model="place" @update:modelValue="search=[place, password].join('&&')" :items="Array.from(new Set(devices.map(r => r.place)))"></v-select>
+          <v-select class="mr-4 mt-5" density="compact" max-width="344" clearable label="请选择密码" v-model="password" @update:modelValue="search=[place, password].join('&&')" :items="Array.from(new Set(devices.map(r => r.password)))"></v-select>
           <v-text-field label="搜索" class="mr-4" v-model="search" hide-details max-width="344" density="compact" clearable></v-text-field>
           <v-btn class="me-2" prepend-icon="mdi-plus" rounded="lg" text="新增" border @click="add"></v-btn>
         </v-toolbar>
@@ -69,6 +71,8 @@ const formModel = ref(createNewRecord())
 const dialog = shallowRef(false)
 const isEditing = ref(false)
 const search = ref('')
+const place = ref('')
+const password = ref('')
 
 const headers = [
   // { title: 'id', key: 'id' },
@@ -83,6 +87,13 @@ onMounted(() => {
   init()
 })
 
+function filterText (value, query, item) {
+  if (query && query.indexOf('&&') !== -1) {
+    return value != null && typeof value === 'string' && query.split('&&').filter(Boolean).every(q => Object.values(item.raw).includes(q))
+  } else {
+    return value != null && query != null && typeof value === 'string' && value.toLowerCase().indexOf(query.toLowerCase()) > -1
+  }
+}
 function copy(id) {
   isEditing.value = false
   const found = devices.value.find(recorder => recorder.id === id)
